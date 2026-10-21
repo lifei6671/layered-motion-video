@@ -1,0 +1,57 @@
+test_duplicate_json_and_nonfinite (test_sc_p1.BoundaryTests.test_duplicate_json_and_nonfinite) ... ok
+test_external_junction_and_internal_output_alias (test_sc_p1.BoundaryTests.test_external_junction_and_internal_output_alias) ... ok
+test_shared_contract_invalid_cases (test_sc_p1.BoundaryTests.test_shared_contract_invalid_cases) ... ok
+test_unsafe_paths (test_sc_p1.BoundaryTests.test_unsafe_paths) ... ok
+test_absolute_rounding_not_accumulated (test_sc_p1.ClockTests.test_absolute_rounding_not_accumulated) ... ok
+test_conflicting_and_outside_windows (test_sc_p1.ClockTests.test_conflicting_and_outside_windows) ... ok
+test_cuts_and_single_frame (test_sc_p1.ClockTests.test_cuts_and_single_frame) ... ok
+test_decimal_clock_once_and_half_up (test_sc_p1.ClockTests.test_decimal_clock_once_and_half_up) ... ok
+test_holds_freeze_motion (test_sc_p1.ClockTests.test_holds_freeze_motion) ... ok
+test_placements_odd_even (test_sc_p1.ClockTests.test_placements_odd_even) ... ok
+test_alpha_icc_cover_and_preview (test_sc_p1.ImageTests.test_alpha_icc_cover_and_preview) ... ok
+test_bad_icc_and_animation_fail (test_sc_p1.ImageTests.test_bad_icc_and_animation_fail) ... ok
+test_exif_bbox_all_orientations (test_sc_p1.ImageTests.test_exif_bbox_all_orientations) ... ok
+test_subject_missing_and_clipped_localization (test_sc_p1.ImageTests.test_subject_missing_and_clipped_localization) ... ok
+test_approved_staging_is_copy_and_contains_only_images (test_sc_p1.ProjectTests.test_approved_staging_is_copy_and_contains_only_images) ... ok
+test_candidate_and_reference_cannot_stage (test_sc_p1.ProjectTests.test_candidate_and_reference_cannot_stage) ... ok
+test_changed_approval_metadata_is_stale (test_sc_p1.ProjectTests.test_changed_approval_metadata_is_stale) ... ok
+test_cli_fails_without_traceback_for_pending (test_sc_p1.ProjectTests.test_cli_fails_without_traceback_for_pending) ... ok
+test_cli_png_decoder_pixel_limit (test_sc_p1.ProjectTests.test_cli_png_decoder_pixel_limit) ... ok
+test_cli_unicode_error_is_valid_json_on_legacy_console (test_sc_p1.ProjectTests.test_cli_unicode_error_is_valid_json_on_legacy_console) ... ok
+test_cli_yaml_syntax_and_nonjson_values (test_sc_p1.ProjectTests.test_cli_yaml_syntax_and_nonjson_values) ... ok
+test_clock_fixture_and_determinism (test_sc_p1.ProjectTests.test_clock_fixture_and_determinism) ... ok
+test_mixed_policy_requires_every_shot (test_sc_p1.ProjectTests.test_mixed_policy_requires_every_shot) ... ok
+test_nonimage_public_data_is_not_exposed_or_removed (test_sc_p1.ProjectTests.test_nonimage_public_data_is_not_exposed_or_removed) ... ok
+test_pending_policy_never_stages_production (test_sc_p1.ProjectTests.test_pending_policy_never_stages_production) ... ok
+test_production_requires_receipts_and_rights (test_sc_p1.ProjectTests.test_production_requires_receipts_and_rights) ... ok
+test_script_gaps_and_invalid_references (test_sc_p1.ProjectTests.test_script_gaps_and_invalid_references) ... ok
+test_source_change_requires_confirmation (test_sc_p1.ProjectTests.test_source_change_requires_confirmation) ... ok
+test_stale_overrides_and_nonempty_overrides_need_alignment (test_sc_p1.ProjectTests.test_stale_overrides_and_nonempty_overrides_need_alignment) ... ok
+test_stale_transition_evidence (test_sc_p1.ProjectTests.test_stale_transition_evidence) ... ok
+test_third_party_requires_url_query_and_license_evidence (test_sc_p1.ProjectTests.test_third_party_requires_url_query_and_license_evidence) ... ok
+test_unicode_raw_bytes_and_offsets (test_sc_p1.ProjectTests.test_unicode_raw_bytes_and_offsets) ... ok
+test_validate_has_no_writes (test_sc_p1.ProjectTests.test_validate_has_no_writes) ... ok
+test_audio_edit_invalidates_evidence (test_sc_p3.SpeechTests.test_audio_edit_invalidates_evidence) ... ok
+test_backend_fallback_and_overlapping_segments_block (test_sc_p3.SpeechTests.test_backend_fallback_and_overlapping_segments_block) ... ok
+test_confirmed_window_recovers_bad_coarse_time_and_first_shot_fallback (test_sc_p3.SpeechTests.test_confirmed_window_recovers_bad_coarse_time_and_first_shot_fallback) ... ok
+test_extra_and_truncated_are_localized (test_sc_p3.SpeechTests.test_extra_and_truncated_are_localized) ... ok
+test_manual_boundary_resolves_timing_but_never_content (test_sc_p3.SpeechTests.test_manual_boundary_resolves_timing_but_never_content) ... ok
+test_manual_confirmation_recovers_full_fallback_and_first_shot_internal_gap (test_sc_p3.SpeechTests.test_manual_confirmation_recovers_full_fallback_and_first_shot_internal_gap) ... ok
+test_many_to_many_confirmed_reading (test_sc_p3.SpeechTests.test_many_to_many_confirmed_reading) ... ok
+test_missing_fallback_interpolation_wildcard_and_low_score (test_sc_p3.SpeechTests.test_missing_fallback_interpolation_wildcard_and_low_score) ... ok
+test_nonlocal_service_rejected_before_upload (test_sc_p3.SpeechTests.test_nonlocal_service_rejected_before_upload) ... ok
+test_numbers_percent_units_mapping_and_unicode (test_sc_p3.SpeechTests.test_numbers_percent_units_mapping_and_unicode) ... ok
+test_ordered_repeated_sentence_and_missing_repeat (test_sc_p3.SpeechTests.test_ordered_repeated_sentence_and_missing_repeat) ... ok
+test_overrides_stale_conflicts_bounds_and_receipt (test_sc_p3.SpeechTests.test_overrides_stale_conflicts_bounds_and_receipt) ... ok
+test_production_cannot_bypass_alignment_or_use_technical_evidence (test_sc_p3.SpeechTests.test_production_cannot_bypass_alignment_or_use_technical_evidence) ... ok
+test_real_ffmpeg_pcm_retains_leading_trailing_and_internal_silence (test_sc_p3.SpeechTests.test_real_ffmpeg_pcm_retains_leading_trailing_and_internal_silence) ... ok
+test_replay_is_deterministic_and_tampering_or_staleness_fails (test_sc_p3.SpeechTests.test_replay_is_deterministic_and_tampering_or_staleness_fails) ... ok
+test_seconds_are_offset_once_and_pcm_clock_is_not_channels (test_sc_p3.SpeechTests.test_seconds_are_offset_once_and_pcm_clock_is_not_channels) ... ok
+test_unplanned_transitions_do_not_block_alignment_or_become_authored_cuts (test_sc_p3.SpeechTests.test_unplanned_transitions_do_not_block_alignment_or_become_authored_cuts) ... ok
+test_unplanned_transitions_still_reject_bad_clock_and_authored_effect (test_sc_p3.SpeechTests.test_unplanned_transitions_still_reject_bad_clock_and_authored_effect) ... ok
+test_window_override_replaces_not_duplicates_offset (test_sc_p3.SpeechTests.test_window_override_replaces_not_duplicates_offset) ... ok
+
+----------------------------------------------------------------------
+Ran 52 tests in 60.478s
+
+OK

@@ -1,0 +1,14 @@
+[project]
+name = "static-comic-video"
+version = "0.1.0"
+description = "Static comic skill: environment probes and deterministic input compilation (SC-P0/P1)"
+requires-python = "==3.12.*"
+dependencies = [
+    "jsonschema==4.26.0",
+    "pillow==13.0.0",
+    "pyyaml==6.0.3",
+    "whisperx==3.8.6",
+]
+
+[tool.uv]
+package = false

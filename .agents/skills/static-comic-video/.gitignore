@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+renderer/static-comic/node_modules/
+renderer/static-comic/dist/
+reports/local/
+reports/*
+!reports/*.md
+!reports/repair-20261021/
+!reports/sc-p7/
+reports/sc-p7/*
+!reports/sc-p7/sample-plan.md

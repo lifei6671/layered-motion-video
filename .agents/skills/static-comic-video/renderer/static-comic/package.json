@@ -1,0 +1,30 @@
+{
+  "name": "static-comic-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "versions": "remotion versions",
+    "browser:ensure": "remotion browser ensure",
+    "probe": "node probe.mjs",
+    "contracts:generate": "node generate-contracts.mjs",
+    "contracts:check": "node generate-contracts.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run contracts:check && tsc && node --test test-contracts.mjs test-visual.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.515",
+    "@remotion/cli": "4.0.515",
+    "@remotion/renderer": "4.0.515",
+    "@remotion/transitions": "4.0.515",
+    "ajv": "8.17.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "remotion": "4.0.515"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "json-schema-to-typescript": "15.0.4",
+    "typescript": "5.9.3"
+  }
+}

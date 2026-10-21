@@ -1,0 +1,10 @@
+{
+  "style_version": "warm-comic-v1",
+  "style": "暖米黄底色，柔和色块，细黑色手绘线条，简洁漫画插画",
+  "characters": "填写角色服装、发型、体型和跨镜头固定特征；无人则明确写无人物",
+  "objects": "填写关键物体外观及比例约束",
+  "lighting": "左上方柔光，避免强烈高光和深黑阴影",
+  "exclusions": "不要水印、字幕、乱码、照片写实风格、多余肢体，不裁切主体",
+  "publication_scope": "填写实际发布平台、是否商业用途和需满足的授权范围",
+  "shots": [{"shot_id": "SHOT-001", "visual_task": "填写口播对应的具体视觉任务", "picture_type": "叙事漫画插画", "composition": "主体居中，四边留白；填写前中后景关系"}]
+}

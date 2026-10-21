@@ -1,0 +1,27 @@
+test_attempt_failure_identifies_retained_old_inputs (test_sc_p6.CacheTests.test_attempt_failure_identifies_retained_old_inputs) ... ok
+test_cache_manifest_cannot_escape_entry (test_sc_p6.CacheTests.test_cache_manifest_cannot_escape_entry) ... ok
+test_failure_does_not_cache_half_product_and_retry_completes (test_sc_p6.CacheTests.test_failure_does_not_cache_half_product_and_retry_completes) ... ok
+test_identical_inputs_hit_and_content_version_change_miss (test_sc_p6.CacheTests.test_identical_inputs_hit_and_content_version_change_miss) ... ok
+test_malformed_manifest_result_and_inventory_rebuild (test_sc_p6.CacheTests.test_malformed_manifest_result_and_inventory_rebuild) ... ok
+test_missing_corrupt_key_and_uncommitted_payload_never_hit (test_sc_p6.CacheTests.test_missing_corrupt_key_and_uncommitted_payload_never_hit) ... ok
+test_publication_failure_rolls_back_existing_outputs (test_sc_p6.CacheTests.test_publication_failure_rolls_back_existing_outputs) ... ok
+test_audio_hit_corruption_and_failure_preserve_master (test_sc_p6.PreparationTests.test_audio_hit_corruption_and_failure_preserve_master) ... ok
+test_compile_hits_images_and_reprocesses_only_changed_image (test_sc_p6.PreparationTests.test_compile_hits_images_and_reprocesses_only_changed_image) ... ok
+test_validation_is_read_only_and_corrupt_staging_blocks (test_sc_p6.PreparationTests.test_validation_is_read_only_and_corrupt_staging_blocks) ... ok
+test_explanation_only_reuses_visual_but_requires_new_approval (test_sc_p6_delivery.DeliveryCacheTests.test_explanation_only_reuses_visual_but_requires_new_approval) ... ok
+test_identical_rerun_hits_all_stages_and_preserves_binding (test_sc_p6_delivery.DeliveryCacheTests.test_identical_rerun_hits_all_stages_and_preserves_binding) ... ok
+test_imported_schema_change_rebuilds_bundle_and_visual (test_sc_p6_delivery.DeliveryCacheTests.test_imported_schema_change_rebuilds_bundle_and_visual) ... ok
+test_missing_image_or_corrupt_staging_retains_old_final (test_sc_p6_delivery.DeliveryCacheTests.test_missing_image_or_corrupt_staging_retains_old_final) ... ok
+test_missing_or_corrupt_published_visual_forces_render (test_sc_p6_delivery.DeliveryCacheTests.test_missing_or_corrupt_published_visual_forces_render) ... ok
+test_motion_and_transition_execution_change_rebuild_entire_visual (test_sc_p6_delivery.DeliveryCacheTests.test_motion_and_transition_execution_change_rebuild_entire_visual) ... ok
+test_mux_failure_preserves_final_and_approval (test_sc_p6_delivery.DeliveryCacheTests.test_mux_failure_preserves_final_and_approval) ... ok
+test_render_failure_retains_preview_final_and_approval_retry_succeeds (test_sc_p6_delivery.DeliveryCacheTests.test_render_failure_retains_preview_final_and_approval_retry_succeeds) ... ok
+test_voice_duration_changes_total_frames_and_renders (test_sc_p6_delivery.DeliveryCacheTests.test_voice_duration_changes_total_frames_and_renders) ... ok
+test_voice_same_timeline_reuses_visual_and_remuxes (test_sc_p6_delivery.DeliveryCacheTests.test_voice_same_timeline_reuses_visual_and_remuxes) ... ok
+test_changed_service_backend_is_not_cached_then_retry_and_hit (test_sc_p6_speech.AlignmentCacheTests.test_changed_service_backend_is_not_cached_then_retry_and_hit) ... ok
+test_worker_failure_preserves_aligned_and_retry_uses_coarse_cache (test_sc_p6_speech.AlignmentCacheTests.test_worker_failure_preserves_aligned_and_retry_uses_coarse_cache) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 78.718s
+
+OK
