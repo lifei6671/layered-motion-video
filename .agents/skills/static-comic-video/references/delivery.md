@@ -1,6 +1,6 @@
 # SC-P5 有声预览与正式封装
 
-所有命令在 Skill 根执行，路径由参数数组传递，Remotion 固定使用本地 renderer/static-comic 的 CLI、配置和浏览器；不自动下载。先读 runtime.md。生产素材必须完成 SC-P3A、SC-P3 和 SC-P4；没有真实用户批准不能复制测试收据继续制作。
+所有命令由 Agent 在 Skill 根执行，路径由参数数组传递，Remotion 使用本地 renderer/static-comic 的 CLI、配置和浏览器；缺依赖由 Agent 按 runtime.md 准备，交付命令不隐式下载。生产素材必须完成 SC-P3A、SC-P3 和 SC-P4；没有真实用户批准不能复制测试收据继续制作。用户只需查看效果并回复意见，不负责复制文件、执行命令或准备 JSON。正式导出是本地文件产出，不是商业发布许可认证。
 
 ## 最小命令流程
 
@@ -20,7 +20,7 @@
 .venv/Scripts/python.exe -m static_comic verify --project <episode>
 ```
 
-init 仅创建空输入布局、默认画布、空图片清单/收据和 SOURCE_POLICY_PENDING，并返回四种供图选择，不预选渠道、不生成配音、不猜分镜。补入原文、完整配音和原文区间分镜后，按 image-supply.md 完成 policy/confirm-policy、plan/confirm-plan、dispatch、ingest、report、review、verify。Agent 生图或图库获取由已授权工具实际执行；没有工具不得声称获取完成。人工供图走同样导入与审图流程。
+init 仅创建空输入布局、默认画布、空图片清单/收据和 SOURCE_POLICY_PENDING。Agent 从已给文件和对话补入原文、完整配音与分镜，并沿用已明确渠道；命令返回选项不意味着必须再次询问。缺少原文/配音或内容方向不清时才索取必要信息。按 image-supply.md 连续完成各命令；没有工具不得声称获取完成。人工供图只要求用户提供图片，后续导入与审图准备由 Agent 完成。
 
 沿用现有 images、align、transitions、validate/compile 子命令，不另建一套时间线。status 重新检查来源、图片计划、图片批准和编译门禁；无效输入返回 REVIEW_REQUIRED 及原因。普通 CLI 失败退出 2；status 可能成功返回待审状态，调用者应检查 JSON status。
 
@@ -35,7 +35,7 @@ Studio 是无声逐帧检查，不代表有声预览通过。每次预览重新�
 - work/remotion/visual.mp4、output/final.mp4：批准后生成的正式无声轨与封装成片。
 - reports/preview.json、visual.json、render.json、validation.json：输入绑定、工具与源码版本、命令、耗时、媒体摘要和技术验证。
 
-inspect 返回 binding_sha256；Agent 据此准备建议，用户完整观看试听后通过 [human-confirm](human-confirmation.md) 的 preview scope 确认，再把返回的签名文件传给 approve。正式画质使用 final scope 独立确认。下面是建议格式，未签名时不能用于生产批准：
+inspect 返回 binding_sha256；Agent 据此准备并展示建议，用户完整观看试听后在聊天中明确确认，Agent 按 [确认流程](human-confirmation.md) 记录真实回复，以 preview scope 签发并将返回的签名文件传给 approve。用户无需执行命令或转交收据。正式画质使用 final scope 独立确认，不能从预览批准推导；各检查项必须有用户回复支持，不能从测试通过推导完整试听或画质认可。下面是建议格式，未签名时不能用于生产批准：
 
 ```json
 {

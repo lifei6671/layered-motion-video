@@ -189,7 +189,10 @@ export function Editor({controller,catalog:initialCatalog}:{controller:DocumentC
       const frozen=clone(controller.getSnapshot().document);await prepareArtwork(frozen);await checkFontCoverage(frozen);
       const response=await fetch('/api/cover-export?format='+format,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(frozen),signal:AbortSignal.timeout(180000)});
       if(!response.ok)throw Error((await response.json()).error||'导出失败');
-      const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=frozen.name.replace(/[<>:"/\\|?*]/g,'_')+'.'+(format==='jpeg'?'jpg':'png');link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
+      let divisor=frozen.width,remainder=frozen.height;
+      while(remainder){[divisor,remainder]=[remainder,divisor%remainder];}
+      const ratio=`${frozen.width/divisor}x${frozen.height/divisor}`;
+      const blob=await response.blob(),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=frozen.name.replace(/[<>:"/\\|?*]/g,'_')+'_'+ratio+'.'+(format==='jpeg'?'jpg':'png');link.click();setTimeout(()=>URL.revokeObjectURL(url),30000);
       setModal(null);notify(`已导出 ${frozen.width}×${frozen.height} ${format.toUpperCase()} 封面。`);
     }finally{setBusy(false);}
   }

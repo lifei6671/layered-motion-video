@@ -218,3 +218,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+.idea/
+.codegraph/
+
+# Static comic local assets and execution records
+/content/
+/reports/static-comic-video/
+/.local/static-comic-video/

@@ -4,7 +4,7 @@
 
 ## 运行
 
-工作目录：本 Skill 的 `renderer/static-comic/`。依赖继续固定 Remotion 4.0.515。Windows 推荐使用本地 node 入口，不通过 npx 隐式安装。
+Agent 在本 Skill 的 `renderer/static-comic/` 执行命令，负责启动、打开和停止本次 Studio 会话，不要求用户操作终端。依赖继续固定 Remotion 4.0.515。Windows 使用本地 node 入口，缺依赖按 runtime.md 准备，不通过 npx 隐式安装。
 
 以下命令使用已交付的技术展示夹具：
 
@@ -14,7 +14,7 @@ node node_modules/@remotion/cli/remotion-cli.js studio src/technical.tsx --props
 node node_modules/@remotion/cli/remotion-cli.js render src/technical.tsx ComicVideo ../../reports/sc-p2/showcase.mp4 --props=../../reports/sc-p2/fixtures/showcase/work/remotion/technical/props.json --public-dir=../../reports/sc-p2/fixtures/showcase/work/remotion/technical/public --muted --codec=h264 --pixel-format=yuv420p --color-space=bt709 --image-format=png --crf=18 --concurrency=2 --browser-executable=node_modules/.remotion/chrome-headless-shell/win64/chrome-headless-shell-win64/chrome-headless-shell.exe
 ```
 
-Studio 地址为 [localhost:3032/ComicVideo](http://localhost:3032/ComicVideo)。同一 props 和 public 路径用于 Studio/导出。关闭运行 Studio 的终端进程即可停止服务。当前 CLI 的 `studio --help` 也会启动 Studio，不用它查询参数。
+Studio 地址为 [localhost:3032/ComicVideo](http://localhost:3032/ComicVideo)。同一 props 和 public 路径用于 Studio/导出。Agent 通过本次启动的会话句柄停止服务，不结束用户已有进程。当前 CLI 的 `studio --help` 也会启动 Studio，不用它查询参数。
 
 `src/index.tsx` 是普通入口，拒绝 technical_fixture；`src/technical.tsx` 是显式技术测试入口。没有默认生产素材，也没有把技术文件自动转为 production 的流程。输入 props 必须来自 SC-P1 编译器；手工修改 props 不等于通过审核。SC-P6 之前不承诺完整事务、并发隔离与跨进程快照防篡改。
 

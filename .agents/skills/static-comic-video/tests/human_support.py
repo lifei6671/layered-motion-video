@@ -1,4 +1,4 @@
-"""Simulated terminal confirmations with a disposable TEST-ONLY account key.
+"""Simulated chat/terminal confirmations with a disposable TEST-ONLY account key.
 
 Never install a test key in the user's authority directory. Verification itself
 is not mocked; production receipts cannot validate under this ephemeral key.
@@ -20,8 +20,14 @@ atexit.register(_temp.cleanup)
 atexit.register(_patch.stop)
 
 
-def simulated(scope, decision):
+def simulated(scope, decision, *, source='conversation'):
     value = human_review.payload(decision)
+    if source == 'conversation':
+        return human_review.conversation(scope, decision, {
+            'thread_id': 'SYNTHETIC-TEST-ONLY',
+            'user_message': 'SYNTHETIC TEST ONLY: explicit decision for the displayed object',
+            'scope': scope, 'decision_sha256': digest(value),
+        })
     token = digest({'scope': scope, 'payload': value})[:12]
     with patch('sys.stdin.isatty', return_value=True), redirect_stdout(StringIO()) as stream:
         with patch.object(stream, 'isatty', return_value=True), patch('builtins.input', return_value=f'CONFIRM {token}'), \

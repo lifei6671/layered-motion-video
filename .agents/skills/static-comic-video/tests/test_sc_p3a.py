@@ -206,26 +206,18 @@ class ImageSupplyTests(unittest.TestCase):
         self.assertEqual((self.root / images.APPROVALS).read_bytes(), before)
         self.assertTrue(all(r["status"] == "CANDIDATE_READY" for r in images.supply(self.root)["records"]))
 
-    def test_visual_approval_cannot_override_rights_or_reference_role(self):
+    def test_visual_approval_cannot_select_reference_only_as_final_artwork(self):
         req = self.prepare(True)
-        for kind in ("unknown-rights", "reference", "derivative"):
-            sub = make_submission(self.root, req, 1)
-            if kind == "unknown-rights":
-                sub["license"]["publication_allowed"] = False
-            elif kind == "reference":
-                sub["usage_role"] = "reference_only"
-            else:
-                sub["references"] = [{"source_uri": "https://example.invalid/reference", "sha256": "1" * 64,
-                                      "version": "v1", "license_evidence": sub["license_evidence"],
-                                      "derivation_allowed": False}]
-            images.ingest(self.root, sub)
-            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, "rights unresolved"):
-                images.review(self.root, decision_for(self.root))
+        sub = make_submission(self.root, req, 1)
+        sub["usage_role"] = "reference_only"
+        images.ingest(self.root, sub)
+        with self.assertRaisesRegex(ValueError, "reference_only"):
+            images.review(self.root, decision_for(self.root))
         self.assertEqual(images.read_doc(self.root, images.APPROVALS, "approvals")["receipts"], [])
 
-    def test_style_identity_and_attribution_are_explicit_human_checks(self):
+    def test_visual_checks_still_require_explicit_acceptance(self):
         self.acquire()
-        for check in ("comic_style", "character_identity", "attribution_ready", "resolution_accepted"):
+        for check in images.VISUAL_CHECKS:
             decision = decision_for(self.root)
             decision["items"][0]["checks"][check] = False
             with self.subTest(check=check), self.assertRaisesRegex(ValueError, "visual checks"):

@@ -352,7 +352,7 @@ def report(root):
                   "compiled_window_preview": windows.get(item["from_shot_id"])}
         rows.append(f'<section><h2>{item["from_shot_id"]} → {item["to_shot_id"]}</h2><div class="pair">' +
                     ''.join(thumbs) + '</div><pre>' + escape(canonical(detail).decode("utf-8")) + '</pre></section>')
-    html = '<!doctype html><meta charset="utf-8"><title>转场语义审核</title><style>body{font:16px sans-serif;margin:32px;max-width:1100px}.pair{display:flex}figure{margin:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere}section{border-bottom:1px solid #aaa}</style><h1>待审候选：存在不等于批准</h1><p>窗口由 SC-P1 计算；正式执行须逐边界人工确认并 apply、compile。</p>' + ''.join(rows)
+    html = '<!doctype html><meta charset="utf-8"><title>转场语义审核</title><style>body{font:16px sans-serif;margin:32px;max-width:1100px}.pair{display:flex}figure{margin:8px}pre{white-space:pre-wrap;overflow-wrap:anywhere}section{border-bottom:1px solid #aaa}</style><h1>转场效果确认</h1><p>可在聊天中确认本页整批转场，也可指出需要调整的边界；Agent 负责记录和后续执行。</p>' + ''.join(rows)
     outputs["review/transitions/index.html"] = html.encode("utf-8")
     write_docs(root, outputs)
     return {"status": value["status"], "report": "review/transitions/index.html", "candidate_sha256": digest(value)}

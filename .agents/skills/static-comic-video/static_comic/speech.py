@@ -8,7 +8,7 @@ import sys
 
 from .contracts import bytes_digest, canonical, read_json
 from .paths import read_bytes, write_bytes
-from .speech_audio import prepare_audio, transcribe_service, wav_info
+from .speech_audio import prepare_audio, transcribe_service, transcribe_local, wav_info
 from .speech_text import check_overrides, make_plan
 from .timeline import compile_timing, seconds_to_samples
 from .cache import cached_json, publish, versions
@@ -148,9 +148,11 @@ def evaluate(board, plan, raw_windows, entries, samples):
             "time_precision":"WhisperX 3.8.6 rounds raw character seconds to 0.001 s; integer samples do not imply sample-accurate acoustics"}
 
 
-def align_project(root, *, url, models_lock, technical_fixture=False):
+def align_project(root, *, url, models_lock, technical_fixture=False, asr_source="voicestudio"):
     from .project import load_project
     root = Path(root).resolve(strict=True)
+    if asr_source not in ("voicestudio", "local"):
+        raise ValueError("Unknown coarse ASR source")
     docs, hashes, _ = load_project(root)
     board = docs["storyboard"]
     script = read_bytes(root,"input/script.txt",LIMIT).decode("utf-8-sig")
@@ -167,13 +169,13 @@ def align_project(root, *, url, models_lock, technical_fixture=False):
                        'static_comic/speech_text.py', 'static_comic/speech_worker.py',
                        'uv.lock', packages=('whisperx', 'torch', 'transformers', 'faster-whisper'))
     def coarse_asr():
-        value = transcribe_service(root, url, lock)
+        value = transcribe_service(root, url, lock) if asr_source == "voicestudio" else transcribe_local(root, lock)
         if value.get('backend_matches') is not True:
             evidence = store_evidence(root, value)
-            raise ValueError('VoiceStudio backend changed; diagnostic evidence: '+evidence)
+            raise ValueError('ASR backend changed; diagnostic evidence: '+evidence)
         make_plan(script, board, value, entries, samples)  # Reject malformed provider output before caching.
         return value
-    coarse = cached_json(root, 'coarse-asr', {'audio': audio['align'], 'url': url,
+    coarse = cached_json(root, 'coarse-asr', {'audio': audio['align'], 'url': url, 'source': asr_source,
                           'model': lock['asr'], 'version': adapter}, coarse_asr)
     coarse_ref = store_evidence(root,coarse)
     plan = make_plan(script,board,coarse,entries,samples)

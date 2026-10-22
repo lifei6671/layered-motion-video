@@ -65,10 +65,6 @@ def check_approval(shot, asset, policy_hash, assignment, receipts):
         raise ValueError(f"{sid}: REVIEW_REQUIRED; candidate/reference/fixture images cannot enter production")
     if any(asset[k] != assignment[k] for k in ("source_mode", "channel")):
         raise ValueError(f"{sid}: source differs from the confirmed policy")
-    if not asset["license"]["publication_allowed"]:
-        raise ValueError(f"{sid}: publication rights are not established")
-    if not all(asset["license"][k].strip() for k in ("id", "evidence", "usage_scope")):
-        raise ValueError(f"{sid}: missing license evidence")
     if asset["source_mode"] == "third_party_retrieve":
         if not asset["source_uri"].startswith(("https://", "http://")) or not asset["query"].strip():
             raise ValueError(f"{sid}: third-party source URL and query are required")

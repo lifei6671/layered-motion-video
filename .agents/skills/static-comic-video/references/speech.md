@@ -6,7 +6,7 @@
 
 ## 运行
 
-工作目录是 Skill 根目录，使用既有隔离环境与 `reports/models.lock.json`。不安装到 VoiceStudio，不修改其模型/设备设置，不自动切换后端或下载权重。
+由 Agent 在 Skill 根目录执行，使用既有隔离环境与 `reports/models.lock.json`。不安装到 VoiceStudio，不修改其模型/设备设置；缺依赖或权重时 Agent 按 runtime.md 准备，align 本身不隐式下载或切换后端。
 
 ```powershell
 .venv/Scripts/python.exe -m static_comic align --project <episode> --voice-url http://127.0.0.1:13900 --models-lock reports/models.lock.json
@@ -15,6 +15,8 @@
 ```
 
 `align` 返回 0 表示技术证据可用于编译，3 表示 `REVIEW_REQUIRED`，2 表示运行/输入错误。真实运行的输出见 `work/alignment/review.json`。技术项目必须显式加 `--technical-fixture`，且报告、编译图片与时间均维持技术标记；它们不能转作生产批准。
+
+默认仍使用 VoiceStudio。若实际服务粗识别遗漏或失真，Agent 可显式使用 `align --asr-source local`，在本 Skill 隔离环境用锁定 ASR 模型离线执行 faster-whisper（CPU/int8），不修改服务设置、不下载模型、不自动切换来源。该路径保存实际完整响应、模型锁、输入 PCM 摘要及识别参数，缓存与服务来源分离；后续原文匹配、WhisperX 字符对齐及内容异常门禁保持相同。粗识别词时间仍不是字符声学证据，诊断文件不能直接替换生产响应。
 
 生产编译现在必须有有效 SC-P3 报告；P1/P2 原有纯技术时间夹具仍可独立运行。原 `input/storyboard.json` 不被改写，应用后的候选进入同一 `compile_timing`，最终源镜头数据写入 `timeline.lock.json`。语义锚点、转场类型和 placement 保留分镜中的规划；它们与声学边界不一致时保留调整原因，交 SC-P4 复核。
 
@@ -33,7 +35,7 @@ WhisperX 3.8.6 自身把字符秒数舍入到 0.001 秒。适配器用其原始�
 
 ## 人工纠错
 
-首次无覆盖运行会生成 `work/alignment/overrides.template.json`。复制到 `input/overrides.json` 后编辑；已有覆盖不会被 `align` 改写。Schema 沿用 P1 的三种 entry：
+首次无覆盖运行会生成 `work/alignment/overrides.template.json`。Agent 读取诊断、定位并展示有问题的原文和音频片段，只对确实不确定的读法或边界请求用户意见，可合并一批问题；不要要求用户算采样点、复制模板或编辑 JSON。收到明确意见后由 Agent 填写 `input/overrides.json` 并重跑；已有覆盖不会被 align 改写。Schema 沿用 P1 的三种 entry：
 
 - `reading`：`script_range` 和实际 `reading`，用于金额、单位、缩写或识别表述差异。数字超过四位默认候选按数字逐位读；不同读法要明确覆盖。英文缩写不强行用中文模型 wildcard 冒充对齐，需确认实际读法。
 - `window`：原文区间和全局 48 kHz `samples: [start,end]`，重对齐范围不跨镜头，不拆一个读法 token。
@@ -45,6 +47,6 @@ WhisperX 3.8.6 自身把字符秒数舍入到 0.001 秒。适配器用其原始�
 
 ## 验收边界
 
-`PASS` 是技术编译候选，不是人类已逐边界试听。`human_boundary_audit` 保持 `NOT_RUN`，本阶段不代写真实用户批准。对照原音逐个检查候选边界、确认配音全文以及最终样片试听仍需真实用户，生产审批闭环属于后续阶段。
+`PASS` 是技术编译候选，不是人类已逐边界试听。Agent 完成可自动执行的全文和边界检查，`human_boundary_audit` 未实际执行时保持 `NOT_RUN`，不因此给用户再增加一轮逐边界问卷。只把未解决的内容或边界歧义集中交用户判断；最终有声预览由用户完整观看试听确认，不伪造试听记录。
 
 测试命令：`.venv/Scripts/python.exe -m unittest discover -s tests -v`；真实集成探针记录见 [SC-P3](../reports/SC-P3.md)。`scripts/create_speech_fixture.ps1` 仅用系统内置声音创建离线测试输入，`scripts/verify_speech_probe.py` 专门构造漏读/截断反例并调用真实服务，不是业务功能。探针目录已存在时拒绝重建；不覆盖已有证据。

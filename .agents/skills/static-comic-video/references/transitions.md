@@ -1,6 +1,6 @@
 # SC-P4 原画语义转场规划
 
-本阶段由 Agent 实际看图提出离散候选，Python 校验来源和时钟，用户确认语义。没有图片识别服务客户端、自动特效轮换或任意 React/Shell 执行。默认优先考虑有理由的硬切；不设置效果多样性配额。
+本阶段由 Agent 实际看图提出离散候选、填写模板、运行全部命令并打开报告，Python 校验来源一致性和时钟，用户确认整体语义效果。没有图片识别服务客户端、自动特效轮换或任意 React/Shell 执行。默认优先考虑有理由的硬切；不设置效果多样性配额。
 
 ## 生产入口与流程
 
@@ -43,7 +43,7 @@ prepare 已返回相邻正式图片路径、完整来源条目和用户批准收
 
 report 生成 review/transitions/index.html，展示前后图、相邻旁白、运镜、停顿、语义意图、候选类型与 SC-P1 计算的窗口。semantic_anchor_frame 是旁白锚点；transition_start_frame / transition_end_frame 是实际半开窗口，内置 fade 的 linearTiming 以 k/L 推进，最后一个窗口帧 end-1 尚未完成，完整后图在 end；自定义 fade_black 使用离散端点，完整后图在 end-1。cut 在锚点直接完整呈现。实际首次可见与完全呈现必须结合具体效果及解码帧核验。逻辑边界与语义锚点不同必须检查原因，不能把两个时机混为一谈。
 
-image/character/方向/反转揭示/淡黑含义都需真实用户判断。明显但无依据的效果应驳回；不是出现五种效果才算通过。以 transitionDecision 提交候选摘要、真实 human 和明确 items，每项包含 from_shot_id、to_shot_id、APPROVED/REJECTED、reason 和 checks（semantics、visual、timing、direction、style_continuity）。仅明确接受全部检查且没有待审事项的边界能批准。不能填写 TEST ONLY 或冒充用户。
+Agent 先检查人物、方向、反转揭示及淡黑含义，解决能自行判断的问题后展示方案；只把内容歧义或具体效果选择交用户。用户可以一次确认全部已展示边界，也可只批准一部分，不需要逐边界回复或勾选内部 checks。Agent 以 transitionDecision 记录明确范围内的 items，每项包含 from_shot_id、to_shot_id、APPROVED/REJECTED、reason 和 checks（semantics、visual、timing、direction、style_continuity）。没有待审事项且用户明确接受当前方案的边界才可批准，不能代填 TEST ONLY 或冒充用户。不是出现五种效果才算通过。
 
 confirm 不等于 apply；apply 不等于已编译或有声预览批准。批准记录绑定完整候选及源上下文，逐边界/批次事件保存于 review/transitions/events。后续驳回、修改候选、改变图片/来源/许可/原文/音频/运镜/语音纠错会使生产门禁失败，必须重新 prepare、看图、提案和确认。不得通过编辑派生候选或 input JSON 伪造通过，系统会重算检查。
 
@@ -63,4 +63,4 @@ scripts/create_transition_demo.py 在新空目录创建六张几何测试图、�
 
 ## 本地确认来源
 
-候选报告展示后，Agent 仅准备 transitionDecision 建议。用户通过 [human-confirm](human-confirmation.md) 的 transitions scope 签发；confirm 和每次生产 approved 验证完整负载与逐边界 item。普通 human/evidence 字符串、变更的候选或旧边界记录不能放行。apply 的多文件写入复用 cache.publish，可捕获失败回滚；断电混合状态仍须重新检查并恢复。
+候选报告展示后，用户在聊天中确认本次转场决定，Agent 按 [确认流程](human-confirmation.md) 记录真实回复，以 transitions scope 签发并应用 transitionDecision。用户无需执行命令。confirm 和每次生产 approved 验证完整负载与逐边界 item。普通无签名 human/evidence 字符串、变更的候选或旧边界记录不能放行。apply 的多文件写入复用 cache.publish，可捕获失败回滚；断电混合状态仍须重新检查并恢复。

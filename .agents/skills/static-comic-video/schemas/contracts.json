@@ -101,6 +101,18 @@
         "pan_y"
       ]
     },
+    "conversationEvidence": {
+      "type": "object",
+      "properties": {
+        "thread_id": {"type": "string", "pattern": "\\S"},
+        "message_id": {"type": "string", "pattern": "\\S"},
+        "user_message": {"type": "string", "pattern": "\\S"},
+        "scope": {"enum": ["policy", "plan", "images", "transitions", "preview", "final"]},
+        "decision_sha256": {"$ref": "#/$defs/hash"}
+      },
+      "required": ["thread_id", "user_message", "scope", "decision_sha256"],
+      "additionalProperties": false
+    },
     "human": {
       "type": "object",
       "properties": {
@@ -123,7 +135,7 @@
           "type": "object",
           "properties": {
             "source": {
-              "const": "local_terminal"
+              "enum": ["local_terminal", "conversation"]
             },
             "scope": {
               "enum": [
@@ -138,6 +150,9 @@
             "payload": {
               "type": "object"
             },
+            "conversation": {
+              "$ref": "#/$defs/conversationEvidence"
+            },
             "signature": {
               "type": "string",
               "pattern": "^[a-f0-9]{64}$"
@@ -149,7 +164,13 @@
             "payload",
             "signature"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "if": {"properties": {"source": {"const": "conversation"}}},
+          "then": {
+            "properties": {"conversation": {"$ref": "#/$defs/conversationEvidence"}},
+            "required": ["conversation"]
+          },
+          "else": {"properties": {"conversation": false}}
         }
       },
       "required": [
@@ -624,13 +645,7 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "id",
-        "evidence",
-        "usage_scope",
-        "attribution",
-        "publication_allowed"
-      ],
+      "required": [],
       "additionalProperties": false
     },
     "asset": {
@@ -720,7 +735,6 @@
         "accessed_at",
         "download_method",
         "style_version",
-        "license",
         "review_status",
         "reviewer"
       ],
@@ -1358,7 +1372,6 @@
         "objects",
         "lighting",
         "exclusions",
-        "publication_scope",
         "shots"
       ],
       "additionalProperties": false
@@ -1561,9 +1574,7 @@
       "required": [
         "source_uri",
         "sha256",
-        "version",
-        "license_evidence",
-        "derivation_allowed"
+        "version"
       ],
       "additionalProperties": false
     },
@@ -1662,8 +1673,6 @@
         "site",
         "accessed_at",
         "download_method",
-        "license",
-        "license_evidence",
         "references",
         "request_record",
         "output_record"
@@ -1704,9 +1713,7 @@
         "narrative",
         "composition",
         "motion_safe",
-        "resolution_accepted",
-        "publication_rights",
-        "attribution_ready"
+        "resolution_accepted"
       ],
       "additionalProperties": false
     },

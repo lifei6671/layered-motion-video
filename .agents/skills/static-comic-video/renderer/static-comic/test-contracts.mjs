@@ -13,6 +13,51 @@ for (const item of cases) {
   });
 }
 const props = cases.find(item => item.kind === 'props' && item.valid).value;
+
+test('local creation does not require commercial or publication declarations', () => {
+  for (const [kind, fields] of [
+    ['imageBrief', ['publication_scope']], ['imageSubmission', ['license', 'license_evidence']],
+  ]) {
+    const value = structuredClone(cases.find(item => item.kind === kind && item.valid).value);
+    for (const field of fields) delete value[field];
+    assert.doesNotThrow(() => validate(kind, value));
+  }
+  const asset = structuredClone(cases.find(item => item.kind === 'manifest' && item.valid).value.assets[0]);
+  delete asset.license;
+  assert.doesNotThrow(() => validate('asset', asset));
+  const checks = {comic_style: true, character_identity: true, narrative: true,
+    composition: true, motion_safe: true, resolution_accepted: true};
+  assert.doesNotThrow(() => validate('imageChecks', checks));
+  assert.doesNotThrow(() => validate('imageChecks', {...checks, publication_rights: false, attribution_ready: false}));
+  assert.doesNotThrow(() => validate('license', {publication_allowed: false}));
+  assert.doesNotThrow(() => validate('imageReference', {source_uri: 'test-only', sha256: 'a'.repeat(64), version: '1'}));
+  delete checks.motion_safe;
+  assert.throws(() => validate('imageChecks', checks));
+});
+
+test('chat confirmation schema binds evidence shape without requiring a terminal source', () => {
+  const human = {
+    actor: 'conversation_user', actor_role: 'human', at: '2026-10-22T00:00:00Z',
+    evidence: 'SYNTHETIC TEST ONLY',
+    confirmation: {
+      source: 'conversation', scope: 'policy', payload: {payload_sha256: 'a'.repeat(64)},
+      signature: 'b'.repeat(64),
+      conversation: {thread_id: 'TEST-ONLY', user_message: '确认来源', scope: 'policy', decision_sha256: 'c'.repeat(64)},
+    },
+  };
+  assert.doesNotThrow(() => validate('human', human)); // Shape only, not approval verification.
+  const missing = structuredClone(human);
+  delete missing.confirmation.conversation;
+  assert.throws(() => validate('human', missing));
+  const blank = structuredClone(human);
+  blank.confirmation.conversation.user_message = ' ';
+  assert.throws(() => validate('human', blank));
+  const terminal = structuredClone(human);
+  terminal.confirmation.source = 'local_terminal';
+  assert.throws(() => validate('human', terminal));
+  delete terminal.confirmation.conversation;
+  assert.doesNotThrow(() => validate('human', terminal));
+});
 test('technical props require explicit fixture admission', () => {
   assert.throws(() => validateProps(validate, props), /Technical fixture/);
   assert.equal(validateProps(validate, props, true).video.total_frames, 360);

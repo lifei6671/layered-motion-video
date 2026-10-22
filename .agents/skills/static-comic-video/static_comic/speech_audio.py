@@ -95,3 +95,30 @@ def transcribe_service(root, base, lock):
             "backend_matches": response.get("engine") == "whisperx" and
                 after.get("active") == before.get("active") and after.get("active_model") == expected_model,
             "timing_source": "coarse_segment", "asr_lock": lock["asr"]}
+
+
+def transcribe_local(root, lock):
+    """Explicit offline coarse ASR; never a silent replacement for the service."""
+    import numpy as np
+    from faster_whisper import WhisperModel
+    from scripts.probe_models import verify_model
+
+    model_path = verify_model(lock["asr"])
+    audio = read_bytes(root, "work/audio/align_16k.wav", 512 * 1024 * 1024)
+    info = wav_info(audio)
+    if info["sample_rate"] != 16000 or info["channels"] != 1:
+        raise ValueError("Local ASR requires the prepared 16 kHz mono PCM")
+    with wave.open(BytesIO(audio), "rb") as stream:
+        samples = np.frombuffer(stream.readframes(info["samples"]), dtype="<i2").astype(np.float32) / 32768
+    model = WhisperModel(str(model_path), device="cpu", compute_type="int8", local_files_only=True)
+    parameters = {"language": "zh", "beam_size": 5, "condition_on_previous_text": False,
+                  "vad_filter": True, "word_timestamps": True, "chunk_length": 30, "temperature": 0.0}
+    segments, detected = model.transcribe(samples, **parameters)
+    response = {"engine": "faster-whisper", "language": detected.language,
+                "duration_s": info["samples"] / 16000, "segments": [
+                    {"start": float(s.start), "end": float(s.end), "text": s.text,
+                     "words": [{"word": w.word, "start": float(w.start), "end": float(w.end),
+                                "probability": float(w.probability)} for w in s.words]} for s in segments]}
+    return {"provider": "locked_local_faster_whisper", "mode": "reference", "response": response,
+            "backend_matches": True, "timing_source": "coarse_segment", "asr_lock": lock["asr"],
+            "audio": info, "device": "cpu", "compute_type": "int8", "parameters": parameters}

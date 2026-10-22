@@ -125,7 +125,7 @@ class ProjectTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"SOURCE_POLICY_PENDING"): compile_project(self.root)
         self.assertFalse((self.root/"work/remotion/public").exists())
 
-    def test_production_requires_receipts_and_rights(self):
+    def test_production_requires_receipts_and_unchanged_metadata(self):
         approved_test_project(self.root)
         original=read(self.root,"review/image_approvals.json")
         save(self.root,"review/image_approvals.json",{"schema_version":"1.0","receipts":[]})
@@ -134,7 +134,7 @@ class ProjectTests(unittest.TestCase):
         manifest=read(self.root,"assets/images/manifest.json")
         manifest["assets"][0]["license"]["publication_allowed"]=False
         save(self.root,"assets/images/manifest.json",manifest)
-        with self.assertRaisesRegex(ValueError,"publication rights"): compile_project(self.root)
+        with self.assertRaisesRegex(ValueError,"approval is stale"): compile_project(self.root)
 
     def test_approved_staging_is_copy_and_contains_only_images(self):
         approved_test_project(self.root)
@@ -212,7 +212,7 @@ class ProjectTests(unittest.TestCase):
         save(self.root,"input/storyboard.json",self.board)
         with self.assertRaisesRegex(ValueError,"visual evidence is stale"): self.compile()
 
-    def test_third_party_requires_url_query_and_license_evidence(self):
+    def test_third_party_requires_source_and_review_not_license_declaration(self):
         approved_test_project(self.root)
         from static_comic.project import check_approval
         shot=self.board["shots"][0]
@@ -222,8 +222,8 @@ class ProjectTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"source URL and query"):
             check_approval(shot,asset,"0"*64,assignment,{})
         asset.update(source_uri="https://example.test/image",query="licensed comic")
-        asset["license"]["evidence"]=" "
-        with self.assertRaisesRegex(ValueError,"license evidence"):
+        del asset["license"]
+        with self.assertRaisesRegex(ValueError,"image existence"):
             check_approval(shot,asset,"0"*64,assignment,{})
 
     def test_cli_fails_without_traceback_for_pending(self):

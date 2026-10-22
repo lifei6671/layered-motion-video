@@ -146,7 +146,7 @@ class PolicyAndPublicationTests(unittest.TestCase):
         images.review(self.root, decision_for(self.root, ['SHOT-001']))
         before = {name: (self.root/name).read_bytes() for name in (images.SUPPLY, images.APPROVALS, images.MANIFEST)}
         decision = decision_for(self.root, ['SHOT-002', 'SHOT-003'])
-        decision['items'][-1]['checks']['publication_rights'] = False
+        decision['items'][-1]['checks']['narrative'] = False
         with self.assertRaisesRegex(ValueError, 'visual checks'):
             images.review(self.root, simulated('images', decision))
         for name, data in before.items(): self.assertEqual((self.root/name).read_bytes(), data)

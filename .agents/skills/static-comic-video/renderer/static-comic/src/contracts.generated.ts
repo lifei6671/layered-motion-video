@@ -141,13 +141,21 @@ export interface Human {
   at: string;
   evidence: string;
   confirmation?: {
-    source: 'local_terminal';
+    source: 'local_terminal' | 'conversation';
     scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final';
     payload: {
       [k: string]: unknown;
     };
+    conversation?: ConversationEvidence;
     signature: string;
   };
+}
+export interface ConversationEvidence {
+  thread_id: string;
+  message_id?: string;
+  user_message: string;
+  scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final';
+  decision_sha256: Hash;
 }
 export interface Manifest {
   schema_version: '1.0';
@@ -170,16 +178,16 @@ export interface Asset {
   accessed_at: string;
   download_method: string;
   style_version: string;
-  license: License;
+  license?: License;
   review_status: ImageStatus;
   reviewer: null | Human;
 }
 export interface License {
-  id: string;
-  evidence: string;
-  usage_scope: string;
-  attribution: string;
-  publication_allowed: boolean;
+  id?: string;
+  evidence?: string;
+  usage_scope?: string;
+  attribution?: string;
+  publication_allowed?: boolean;
 }
 export interface Approvals {
   schema_version: '1.0';

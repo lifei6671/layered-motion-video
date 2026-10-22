@@ -4,7 +4,7 @@ P1 编译层不执行 ASR、图像获取或视频渲染。SC-P3 已补充独立 
 
 ## 命令
 
-在 Skill 根目录执行（项目路径指向单期目录，不是 Skill）：
+由 Agent 在 Skill 根目录执行，编写和校验输入也是 Agent 的工作（项目路径指向单期目录，不是 Skill）：
 
 ```powershell
 .venv/Scripts/python.exe -m static_comic validate --project <episode-directory>
@@ -59,7 +59,7 @@ SC-P3A 已实现 [渠道供应与审图流程](image-supply.md)。生产编译�
 
 渠道为 agent_generate、third_party_retrieve、manual_generate，混合模式逐镜头完整映射。确认记录包含用户、带时区时间、可追溯交互证据，以及除 confirmation 外策略内容的 canonical SHA256。改变策略内容需重新确认，`supersedes` 可链接前一策略摘要。
 
-收据同时绑定图片原始字节 SHA256、完整资产条目摘要、完整来源策略摘要。资产中的 reviewer 必须与收据相同。修改图片、许可、作者、来源或渠道都会使旧批准失效。第三方入镜必须有源 URL、检索条件、许可证据和适用范围。reference_only、候选、未审、驳回、技术用途不能进入生产 public。Agent 不得生成真实用户批准；这些本地摘要用于发现过期记录，不是身份认证或数字签名。
+收据同时绑定图片原始字节 SHA256、完整资产条目摘要、完整来源策略摘要。资产中的 reviewer 必须与收据相同。修改已签图片或元数据会使旧批准失效。第三方入镜保留真实源 URL 和检索条件；license、license_evidence、publication_scope 及相关授权勾选项均为可选记录，不执行商业/发布许可判断。reference_only、候选、未审、驳回、技术用途不能进入生产 public。Agent 依据真实用户回复记录批准；摘要检查用于发现过期记录，签名流程见 human-confirmation.md，不要求用户手工处理。
 
 转场还需绑定相邻两张原始图片的哈希和当前图片批准摘要。SC-P4 已加入 [语义转场流程](transitions.md)：生产多镜头编译必须核验当前候选、逐边界人工收据和 apply 记录。候选与分镜严格分离；更改原文、图片、来源、审批或声学证据会使计划过期。完整性验证不能代替 Agent 实际看图及用户语义审核。只有一个镜头时没有转场边界，无需转场收据。
 

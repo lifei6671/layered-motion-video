@@ -20,6 +20,8 @@ SUPPLY = "work/images/image_supply.json"
 POLICY = "input/image_source_policy.json"
 APPROVALS = "review/image_approvals.json"
 MANIFEST = "assets/images/manifest.json"
+VISUAL_CHECKS = ("comic_style", "character_identity", "narrative", "composition",
+                 "motion_safe", "resolution_accepted")
 
 
 def read_doc(root, name, kind):
@@ -147,7 +149,7 @@ def plan(root, brief):
                   f"灯光：{brief['lighting']}。横向 16:9，建议 2304×1296 或更高同等比例。\n"
                   f"运镜留白：{shot['motion']['type']}，缩放 {shot['motion']['scale_from']}→"
                   f"{shot['motion']['scale_to']}；主体安全区 {shot['subject_bbox']}，主体不得被裁切。\n"
-                  f"具体排除项：{brief['exclusions']}。\n输出 PNG，最终严格命名为 {shot['image']}。")
+                  f"具体排除项：{brief['exclusions']}。\n输出 PNG；文件由 Agent 导入并归档为 {shot['image']}。")
         shots.append({"shot_id": sid, "script": text[a:b], **{k: item[k] for k in
                       ("visual_task", "picture_type", "composition")},
                       **{k: brief[k] for k in ("style_version", "characters", "objects")},
@@ -214,7 +216,7 @@ def dispatch(root, sid, *, unavailable=None):
         raise ValueError("Unknown shot ID")
     status = ("UNAVAILABLE" if unavailable else "WAITING_FOR_USER"
               if item["assignment"]["source_mode"] == "manual_generate" else "PLANNED")
-    reason = unavailable or ("等待用户提供图片；正式路径中的现有文件也须登记审图。"
+    reason = unavailable or ("Agent 先检查已有图片并登记导入；仅确实缺图时请用户提供。"
                              if status == "WAITING_FOR_USER" else "仅准备已确认请求；请通过已连接且授权的工具执行。")
     record = {"shot_id": sid, "request_sha256": digest(req), "status": status,
               "reason": reason, "candidate": None, "review": None}
@@ -244,10 +246,13 @@ def check_submission(root, req, submission):
             raise ValueError("Third-party source URL/site/query/author/download evidence required")
     elif submission["prompt"] != item["prompt"]:
         raise ValueError("Generation must record the full confirmed Chinese prompt")
-    for key in ("license_evidence", "request_record", "output_record"):
+    for key in ("request_record", "output_record"):
         check_evidence(root, submission[key])
+    if "license_evidence" in submission:
+        check_evidence(root, submission["license_evidence"])
     for reference in submission["references"]:
-        check_evidence(root, reference["license_evidence"])
+        if "license_evidence" in reference:
+            check_evidence(root, reference["license_evidence"])
     return item
 
 
@@ -293,13 +298,6 @@ def ingest(root, submission):
     return {"status": record["status"], "candidate_sha256": candidate["sha256"], "record_sha256": digest(record)}
 
 
-def rights(submission):
-    license = submission["license"]
-    return (submission["usage_role"] == "final_artwork" and license["publication_allowed"]
-            and all(license[k].strip() for k in ("id", "evidence", "usage_scope"))
-            and all(r["derivation_allowed"] for r in submission["references"]))
-
-
 def asset_for(req, record, human):
     item = next(s for s in req["shots"] if s["shot_id"] == record["shot_id"])
     sub = record["candidate"]["submission"]
@@ -307,7 +305,7 @@ def asset_for(req, record, human):
                     "sha256": record["candidate"]["sha256"], "purpose": "production",
                     "style_version": item["style_version"], "review_status": "APPROVED", "reviewer": human,
                     **{k: sub[k] for k in ("source_mode", "channel", "prompt", "query", "author", "source_uri",
-                                           "accessed_at", "download_method", "license")}})
+                                           "accessed_at", "download_method", "license") if k in sub}})
 
 
 def review_geometry(req, shot):
@@ -345,10 +343,10 @@ def review(root, decision):
         if item["decision"] == "APPROVED":
             check_submission(root, req, record["candidate"]["submission"])
             _, detail = inspect_candidate(root, record["candidate"], shots[sid])
-            if not all(item["checks"].values()) or detail["subject_status"] != "PASS":
+            if not all(item["checks"][k] for k in VISUAL_CHECKS) or detail["subject_status"] != "PASS":
                 raise ValueError("Image visual checks and motion safety must pass")
-            if not rights(record["candidate"]["submission"]):
-                raise ValueError("Publication rights unresolved or reference_only / derivative forbidden")
+            if record["candidate"]["submission"]["usage_role"] != "final_artwork":
+                raise ValueError("reference_only image cannot be selected as final artwork")
         record["status"] = item["decision"]
         record["reason"] = item["reason"]
         record["review"] = {"human": decision["human"], "item": item}
@@ -392,9 +390,10 @@ def verify_approved(root, req, shot, record, receipt, current_asset, policy):
         raise ValueError(f"{sid}: Human-approved acquisition record changed")
     if item.get("geometry_sha256") != review_geometry(req, shot):
         raise ValueError(f"{sid}: approved review geometry is missing or stale")
-    if (not rights(sub) or item["decision"] != "APPROVED" or not all(item["checks"].values())
+    if (sub["usage_role"] != "final_artwork" or item["decision"] != "APPROVED"
+            or not all(item["checks"][k] for k in VISUAL_CHECKS)
             or item["shot_id"] != sid or item["candidate_sha256"] != record["candidate"]["sha256"]):
-        raise ValueError(f"{sid}: rights or human visual review invalid")
+        raise ValueError(f"{sid}: artwork role or human visual review invalid")
     asset = asset_for(req, record, human)
     if current_asset != asset:
         raise ValueError(f"{sid}: approved supply differs from manifest")
@@ -453,7 +452,7 @@ def report(root):
                     picture = f'<img width="480" src="{sid}.png" alt="{sid}">'
                     if status == "CANDIDATE_READY":
                         status = "REVIEW_REQUIRED"
-                        record.update(status=status, reason="技术检查已完成；人物、画风、叙事、权利及构图须用户审查。")
+                        record.update(status=status, reason="技术检查已完成；请确认本批图片的人物、画风、叙事及构图效果。")
                         save_record(root, record)
                 except (ValueError, OSError) as error:
                     status, reason = "REVIEW_REQUIRED", str(error)
@@ -472,7 +471,7 @@ def report(root):
         fields = {"口播": item["script"], "运镜": shots[sid]["motion"], "原采集运镜": item["motion"],
                   "来源": item["assignment"],
                   "原始来源": sub.get("source_uri"), "用途": sub.get("usage_role"), "许可": sub.get("license"),
-                  "目标发布范围": req["brief"]["publication_scope"], "审核": detail}
+                  "用途备注（不参与合成放行）": req["brief"].get("publication_scope", "未指定；当前仅制作本地视频"), "审核": detail}
         rows.append(f'<section><h2>{sid} — {status}</h2>{picture}<pre>{escape(str(fields))}</pre></section>')
     html = '<!doctype html><meta charset="utf-8"><title>逐镜头审图</title><style>body{font:16px sans-serif;max-width:1100px;margin:32px auto}pre{white-space:pre-wrap}section{border-bottom:1px solid #aaa;padding:20px}</style><h1>候选审图：工具成功不等于用户批准</h1>' + "".join(rows)
     outputs.update({"review/images/index.html": html.encode("utf-8"), "review/images/report.json":

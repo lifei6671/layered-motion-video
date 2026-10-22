@@ -109,6 +109,7 @@ try {
     for(const dismissal of ['cancel','escape','outside']){
       await trigger.hover();const tooltip=page.locator('[data-slot=tooltip-content]');await tooltip.waitFor({state:'visible'});assert.equal(await tooltip.innerText(),await trigger.getAttribute('aria-label'));
       await trigger.click();await dialog.waitFor();
+      await dialog.evaluate(async el=>{await Promise.all(el.getAnimations().map(animation=>animation.finished));});
       if(dismissal==='cancel')await dialog.getByRole('button',{name:'取消',exact:true}).click();else if(dismissal==='escape')await page.keyboard.press('Escape');else await page.mouse.click(500,140);
       await expectDeleteDismissed(trigger,dialog);if(dismissal==='cancel')await page.screenshot({path:path.join(output,'delete-tooltip-dismissed.png')});
     }
@@ -150,6 +151,99 @@ try {
     const order=(await doc()).layers.map(l=>l.id);await page.getByRole('button',{name:'下移一层',exact:true}).click();assert.notDeepEqual((await doc()).layers.map(l=>l.id),order);
     await page.getByTestId('layer-title').dragTo(page.getByTestId('layer-subtitle'));assert.equal((await doc()).layers.findIndex(l=>l.id==='title'),(await doc()).layers.findIndex(l=>l.id==='subtitle')+1);
     await page.screenshot({path:path.join(output,'M3-layer-interactions.png')});
+  });
+  await check('text rotation handle synchronizes angles across zoom, scroll, history and reopen',async()=>{
+    await page.evaluate(()=>window.__coverEditor.controller.save());await saved();const originalDocument=structuredClone(await doc());
+    await page.evaluate(()=>window.__coverEditor.controller.change(d=>{const l=d.layers.find(l=>l.id==='title');l.frame={x:650,y:440,width:600,height:160,rotation:0};l.fontSize=50;}));
+    await page.getByText('高级排版设置',{exact:true}).click();const angle=page.getByLabel('旋转',{exact:true}),handle=page.getByTestId('rotation-handle');
+    async function dragRotation(delta,pause=false){
+      await handle.scrollIntoViewIfNeeded();const h=await handle.boundingBox(),a=await page.getByTestId('artboard').boundingBox(),f=(await layer()).frame,scale=Number(await page.getByTestId('artboard').getAttribute('data-scale'));
+      const cx=a.x+(f.x+f.width/2)*scale,cy=a.y+(f.y+f.height/2)*scale,hx=h.x+h.width/2,hy=h.y+h.height/2,dx=hx-cx,dy=hy-cy;
+      assert.equal(await handle.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('[data-testid=rotation-handle]')===el;}),true,'rotation handle is obstructed');
+      const history=(await state()).historyLength;await page.mouse.move(hx,hy);await page.mouse.down();
+      const cursor=await handle.evaluate(el=>getComputedStyle(el).cursor);assert.ok(cursor.includes('data:image/svg+xml')&&cursor.endsWith('crosshair'),'rotation handle lacks arrow cursor');
+      assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('text-rotation-active')),true);
+      for(const fraction of [.5,1]){const radians=delta*fraction*Math.PI/180;await page.mouse.move(cx+dx*Math.cos(radians)-dy*Math.sin(radians),cy+dx*Math.sin(radians)+dy*Math.cos(radians),{steps:8});if(pause&&fraction===.5){await page.waitForTimeout(620);await page.evaluate(()=>window.__coverEditor.controller.save());assert.equal((await state()).historyLength,history,'paused rotation split undo history');}}
+      await page.mouse.up();
+      assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('text-rotation-active')),false,'rotation cursor stuck after release');
+    }
+    for(const zoom of [25,50,100]){
+      await zoomCanvas(zoom);await angle.fill('0');await page.evaluate(()=>window.__coverEditor.controller.commit());const before=await layer(),history=(await state()).historyLength;
+      await dragRotation(45,zoom===50);const rotated=await layer();assert.ok(Math.abs(rotated.frame.rotation-45)<1);assert.deepEqual({...rotated.frame,rotation:0},before.frame);assert.equal(rotated.fontSize,before.fontSize);assert.equal(rotated.text,before.text);assert.equal(Number(await angle.inputValue()),rotated.frame.rotation);assert.equal((await state()).historyLength,history+1);
+      await page.getByRole('button',{name:'撤销 (Ctrl+Z)',exact:true}).click();assert.equal((await layer()).frame.rotation,0);await page.getByRole('button',{name:'重做 (Ctrl+Shift+Z)',exact:true}).click();assert.equal((await layer()).frame.rotation,rotated.frame.rotation);
+      await angle.fill('30');await page.evaluate(()=>window.__coverEditor.controller.commit());assert.equal((await layer()).frame.rotation,30);assert.ok(Math.abs(await page.locator('.logical-canvas [data-art-layer=title]').evaluate(el=>new DOMMatrixReadOnly(getComputedStyle(el).transform).b)-.5)<.00001);assert.ok((await page.locator('.selection-frame .size-label').innerText()).includes('30°'));
+      const f=(await layer()).frame,a=await page.getByTestId('artboard').boundingBox(),h=await handle.boundingBox(),scale=zoom/100,cx=a.x+(f.x+f.width/2)*scale,cy=a.y+(f.y+f.height/2)*scale,radius=f.height*scale/2+26.5;
+      assert.ok(Math.abs(h.x+h.width/2-cx-Math.sin(Math.PI/6)*radius)<1.5&&Math.abs(h.y+h.height/2-cy+Math.cos(Math.PI/6)*radius)<1.5,'inspector angle did not move rotation handle');
+      if(zoom===50){await handle.scrollIntoViewIfNeeded();await page.screenshot({path:path.join(output,'text-rotation-handle.png')});}
+    }
+    await zoomCanvas(25);await angle.fill('170');await page.evaluate(()=>window.__coverEditor.controller.commit());await dragRotation(20);assert.ok(Math.abs((await layer()).frame.rotation+170)<1,'positive angle wrap failed');
+    await angle.fill('-170');await page.evaluate(()=>window.__coverEditor.controller.commit());await dragRotation(-20);assert.ok(Math.abs((await layer()).frame.rotation-170)<1,'negative angle wrap failed');
+    await angle.fill('0');await page.getByLabel('Y 坐标',{exact:true}).fill('0');
+    for(const [width,height] of [[1366,768],[1440,900],[1920,1080]]){
+      await page.setViewportSize({width,height});await page.getByRole('button',{name:'适应窗口',exact:true}).click();await handle.scrollIntoViewIfNeeded();const box=await handle.boundingBox();assert.ok(Math.abs(box.width-22)<.1&&Math.abs(box.height-22)<.1,'handle changes visual size with zoom');assert.equal(await handle.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('[data-testid=rotation-handle]')===el;}),true,'top-edge handle is obstructed');
+    }
+    await page.setViewportSize({width:1440,height:900});await page.getByLabel('Y 坐标',{exact:true}).fill('440');await angle.fill('30');
+    const row=page.getByTestId('layer-title');await row.getByRole('button',{name:/^锁定图层 /}).click();assert.equal(await handle.count(),0);assert.equal(await angle.isDisabled(),true);await row.getByRole('button',{name:/^解锁图层 /}).click();await row.getByRole('button',{name:/^隐藏图层 /}).click();assert.equal(await handle.count(),0);await row.getByRole('button',{name:/^显示图层 /}).click();await handle.waitFor();
+    await page.getByTestId('layer-background').locator('.layer-select').click();assert.equal(await handle.count(),0);await row.locator('.layer-select').click();
+    await page.getByTestId('hit-title').dblclick();await page.getByLabel('画布文字编辑',{exact:true}).waitFor();assert.equal(await handle.count(),0);await page.keyboard.press('Escape');await handle.waitFor();
+    if(!await angle.isVisible())await page.getByText('高级排版设置',{exact:true}).click();await angle.fill('37');await page.evaluate(()=>window.__coverEditor.controller.save());await saved();const id=(await doc()).id;
+    await page.reload();await ready();assert.equal((await doc()).id,id);assert.equal((await layer()).frame.rotation,37);await handle.waitFor();await page.getByText('高级排版设置',{exact:true}).click();assert.equal(Number(await angle.inputValue()),37);
+    await page.evaluate(async original=>{const controller=window.__coverEditor.controller;await controller.save();const current=controller.getSnapshot().document;await controller.replace({...original,id:current.id,revision:current.revision,updatedAt:current.updatedAt},false,false,false);await controller.save();},originalDocument);await saved();await ready();await page.getByText('高级排版设置',{exact:true}).click();
+  });
+  await check('text orientation actions synchronize and toolbar stays above text or docks to viewport top',async()=>{
+    await page.evaluate(()=>window.__coverEditor.controller.save());await saved();const originalDocument=structuredClone(await doc()),advancedOpen=await page.getByLabel('旋转',{exact:true}).isVisible();
+    await page.evaluate(()=>window.__coverEditor.controller.select('title'));
+    if(!await page.getByLabel('旋转',{exact:true}).isVisible())await page.getByText('高级排版设置',{exact:true}).click();
+    const toolbar=page.locator('.selection-toolbar-position'),handle=page.getByTestId('rotation-handle');
+    async function visibleToolbar(){
+      assert.equal((await state()).selectedId,'title');assert.equal(Number(await page.getByLabel('旋转',{exact:true}).inputValue()),(await layer()).frame.rotation);
+      await page.waitForFunction(()=>{
+        const toolbar=document.querySelector('.selection-toolbar-position'),view=document.querySelector('[data-testid=canvas-viewport]'),frame=document.querySelector('.selection-frame');if(!toolbar||!view||!frame)return false;
+        const t=toolbar.getBoundingClientRect(),v=view.getBoundingClientRect(),f=frame.getBoundingClientRect(),expectedTop=Math.min(v.top+view.clientHeight-t.height-8,Math.max(v.top+8,f.top-t.height-48));
+        return t.left>=v.left+7&&t.top>=v.top+7&&t.right<=v.left+view.clientWidth-7&&t.bottom<=v.top+view.clientHeight-7&&Math.abs(t.top-expectedTop)<1;
+      });
+      assert.equal(await toolbar.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('.selection-toolbar-position')===el;}),true,'selection toolbar is clipped or obstructed');
+    }
+    for(const [width,height] of [[1366,768],[1440,900],[1920,1080]]){
+      await page.setViewportSize({width,height});await page.getByRole('button',{name:'适应窗口',exact:true}).click();
+      for(const rotation of [0,89,90,-90,180])for(const y of [0,400,862]){
+        await page.evaluate(({rotation,y})=>window.__coverEditor.controller.change(d=>{const l=d.layers.find(l=>l.id==='title');l.frame={x:210,y,width:1500,height:218,rotation};l.fontSize=120;},false),{rotation,y});
+        await visibleToolbar();
+        if(width===1440&&rotation===90&&y===400)await page.screenshot({path:path.join(output,'text-rotation-vertical-toolbar.png')});
+      }
+      for(const zoom of [25,100,200]){
+        await zoomCanvas(zoom);
+        for(const position of [[0,0],[700,450],[1400,850]]){
+          await page.getByTestId('canvas-viewport').evaluate((el,[x,y])=>el.scrollTo(x,y),position);await visibleToolbar();
+        }
+      }
+    }
+    await page.setViewportSize({width:1440,height:900});await page.getByRole('button',{name:'适应窗口',exact:true}).click();
+    await chooseRatio('3:4');await page.evaluate(()=>window.__coverEditor.controller.change(d=>{d.layers.find(l=>l.id==='title').frame={x:240,y:0,width:600,height:160,rotation:0};},false));await visibleToolbar();
+    assert.equal(await handle.evaluate(el=>{const r=el.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest('[data-testid=rotation-handle]')===el;}),true,'top-docked toolbar blocks the portrait rotation handle');
+    await chooseRatio('16:9');await page.getByRole('button',{name:'适应窗口',exact:true}).click();
+    await page.evaluate(()=>{const controller=window.__coverEditor.controller;controller.change(d=>{const l=d.layers.find(l=>l.id==='title');l.frame={x:210,y:400,width:1500,height:218,rotation:37};});});
+    const horizontal=page.getByRole('button',{name:'设为水平（0°）',exact:true}),vertical=page.getByRole('button',{name:'设为垂直（90°）',exact:true}),angle=page.getByLabel('旋转',{exact:true});
+    const beforeOrientation=structuredClone(await layer()),orientationHistory=(await state()).historyLength;
+    await horizontal.click();assert.equal((await layer()).frame.rotation,0);await page.waitForFunction(()=>Number(document.querySelector('input[aria-label="旋转"]').value)===0);assert.equal(Number(await angle.inputValue()),0);assert.equal(await horizontal.getAttribute('aria-pressed'),'true');assert.equal((await state()).historyLength,orientationHistory+1);assert.deepEqual(await layer(),{...beforeOrientation,frame:{...beforeOrientation.frame,rotation:0}},'horizontal action changed other text properties');
+    await horizontal.click();assert.equal((await state()).historyLength,orientationHistory+1,'same orientation created extra undo entry');
+    await page.getByRole('button',{name:'撤销 (Ctrl+Z)',exact:true}).click();assert.equal((await layer()).frame.rotation,37);await page.getByRole('button',{name:'重做 (Ctrl+Shift+Z)',exact:true}).click();assert.equal((await layer()).frame.rotation,0);
+    await vertical.click();assert.equal((await layer()).frame.rotation,90);await page.waitForFunction(()=>Number(document.querySelector('input[aria-label="旋转"]').value)===90);assert.equal(Number(await angle.inputValue()),90);assert.equal(await vertical.getAttribute('aria-pressed'),'true');assert.equal(await horizontal.getAttribute('aria-pressed'),'false');assert.deepEqual(await layer(),{...beforeOrientation,frame:{...beforeOrientation.frame,rotation:90}},'vertical action changed other text properties');await visibleToolbar();
+    await angle.fill('-23');await page.evaluate(()=>window.__coverEditor.controller.commit());assert.equal(await horizontal.getAttribute('aria-pressed'),'false');assert.equal(await vertical.getAttribute('aria-pressed'),'false');await vertical.click();await page.waitForFunction(()=>Number(document.querySelector('input[aria-label="旋转"]').value)===90);assert.equal((await layer()).frame.rotation,90);
+    const row=page.getByTestId('layer-title');await row.getByRole('button',{name:/^锁定图层 /}).click();assert.equal(await horizontal.count(),0);assert.equal(await vertical.count(),0);await row.getByRole('button',{name:/^解锁图层 /}).click();
+    await page.getByTestId('layer-background').locator('.layer-select').click();assert.equal(await horizontal.count(),0);assert.equal(await vertical.count(),0);await row.locator('.layer-select').click();
+    await page.evaluate(()=>window.__coverEditor.controller.save());await saved();await page.reload();await ready();assert.equal((await layer()).frame.rotation,90);await page.evaluate(()=>window.__coverEditor.controller.select('title'));if(!await angle.isVisible())await page.getByText('高级排版设置',{exact:true}).click();assert.equal(Number(await angle.inputValue()),90);await visibleToolbar();await page.screenshot({path:path.join(output,'text-orientation-top-toolbar.png')});
+    await page.evaluate(()=>window.__coverEditor.controller.change(d=>{const l=d.layers.find(l=>l.id==='title');l.frame={x:210,y:400,width:1500,height:218,rotation:0};},false));
+    await handle.hover();assert.ok((await handle.evaluate(el=>getComputedStyle(el).cursor)).includes('data:image/svg+xml'));
+    for(const event of ['pointercancel','blur']){
+      await handle.scrollIntoViewIfNeeded();const h=await handle.boundingBox();await page.mouse.move(h.x+h.width/2,h.y+h.height/2);await page.mouse.down();
+      await page.mouse.move(h.x+h.width/2+35,h.y+h.height/2+15,{steps:4});
+      assert.equal(await page.getByTestId('canvas-viewport').evaluate(el=>getComputedStyle(el).cursor),await handle.evaluate(el=>getComputedStyle(el).cursor),'arrow cursor lost outside handle while dragging');
+      if(event==='blur')await page.evaluate(()=>window.dispatchEvent(new Event('blur')));else await handle.dispatchEvent('pointercancel');
+      assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('text-rotation-active')),false,'cursor stuck after '+event);await page.mouse.up();
+    }
+    await page.evaluate(async original=>{const controller=window.__coverEditor.controller;await controller.save();const current=controller.getSnapshot().document;await controller.replace({...original,id:current.id,revision:current.revision,updatedAt:current.updatedAt},false,false,false);await controller.save();},originalDocument);await saved();await ready();
+    if(await page.getByLabel('旋转',{exact:true}).isVisible()!==advancedOpen)await page.getByText('高级排版设置',{exact:true}).click();
   });
   await check('M3 inline Chinese composition and undo/redo',async()=>{
     const previous=(await layer()).text;
@@ -406,6 +500,7 @@ try {
   });
   await check('M5 actual PNG/JPEG export and shared-picture browser baseline',async()=>{
     const exportDoc=structuredClone(original);exportDoc.name='正式导出基准';exportDoc.layers.find(l=>l.id==='title').strokeWidth=4;
+    exportDoc.layers.find(l=>l.id==='title').frame.rotation=17;
     exportDoc.layers.find(l=>l.id==='title').letterSpacing=4;exportDoc.layers.find(l=>l.id==='title').fontSize=112;
     exportDoc.layers.find(l=>l.id==='title').shadow={enabled:true,color:'#001a42',opacity:.75,blur:24,x:8,y:12};
     const fonts=(await (await page.request.get(base+'/api/fonts')).json()).fonts;exportDoc.layers.find(l=>l.id==='title').fontId=fonts.find(f=>f.family==='LXGWWenKai'&&f.weight===400&&!f.monospace).id;
@@ -416,14 +511,17 @@ try {
     await page.evaluate(async d=>{await window.__coverEditor.controller.replace(d);await window.__coverEditor.controller.save();},exportDoc);await ready();
     const frozen=await doc();await writeFile(path.join(output,'export-document.json'),JSON.stringify(frozen,null,2));
     const clean=await context.newPage();await clean.setViewportSize({width:1920,height:1080});await clean.goto(base+'/artwork/'+frozen.id,{waitUntil:'networkidle'});await clean.waitForFunction(()=>window.__coverArtworkReady);
-    assert.equal(await clean.locator('[data-testid=interaction-overlay]').count(),0);await clean.screenshot({path:path.join(output,'browser-artwork.png')});await clean.close();
+    assert.equal(await clean.locator('[data-testid=interaction-overlay]').count(),0);assert.equal(await clean.getByTestId('rotation-handle').count(),0);await clean.screenshot({path:path.join(output,'browser-artwork.png')});await clean.close();
     for(const format of ['png','jpeg']){
       await page.getByRole('button',{name:'导出封面',exact:true}).click();await page.getByLabel('导出格式',{exact:true}).selectOption(format);
-      const wait=page.waitForEvent('download',{timeout:180000});await page.getByRole('button',{name:'下载 '+format.toUpperCase(),exact:true}).click();const download=await wait;await download.saveAs(path.join(output,'formal.'+(format==='jpeg'?'jpg':'png')));
+      const wait=page.waitForEvent('download',{timeout:180000});await page.getByRole('button',{name:'下载 '+format.toUpperCase(),exact:true}).click();const download=await wait;assert.equal(download.suggestedFilename(),'正式导出基准_16x9.'+(format==='jpeg'?'jpg':'png'));await download.saveAs(path.join(output,'formal.'+(format==='jpeg'?'jpg':'png')));
       await page.getByRole('dialog',{name:'导出封面'}).waitFor({state:'hidden',timeout:180000});
     }
     const png=await readFile(path.join(output,'formal.png'));assert.equal(png.readUInt32BE(16),1920);assert.equal(png.readUInt32BE(20),1080);
     await page.screenshot({path:path.join(output,'M5-export-success.png')});
+    await chooseRatio('3:4');await page.getByRole('button',{name:'导出封面',exact:true}).click();await page.getByLabel('导出格式',{exact:true}).selectOption('png');
+    const portraitWait=page.waitForEvent('download',{timeout:180000});await page.getByRole('button',{name:'下载 PNG',exact:true}).click();const portraitDownload=await portraitWait;assert.equal(portraitDownload.suggestedFilename(),'正式导出基准_3x4.png');await portraitDownload.saveAs(path.join(output,'ratio-3x4.png'));await page.getByRole('dialog',{name:'导出封面'}).waitFor({state:'hidden',timeout:180000});
+    const portraitPng=await readFile(path.join(output,'ratio-3x4.png'));assert.equal(portraitPng.readUInt32BE(16),1080);assert.equal(portraitPng.readUInt32BE(20),1440);
   });
   await check('M6 clean runtime and zero edit-triggered backend rendering',async()=>{
     assert.deepEqual(errors,[]);assert.equal(requests.filter(r=>r.method==='POST'&&/\/api\/(render|text-layers|account-layer)/.test(r.url)).length,0);
