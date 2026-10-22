@@ -1,0 +1,19 @@
+{
+  "name": "cover-studio-fabric-poc",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Fabric.js browser rendering validation for Cover Studio",
+  "scripts": {
+    "build": "esbuild src/main.js --bundle --format=iife --target=es2022 --minify --outfile=../static/fabric-poc.bundle.js",
+    "build:debug": "esbuild src/main.js --bundle --format=iife --target=es2022 --sourcemap --outfile=../static/fabric-poc.bundle.js",
+    "test:browser": "node tests/browser-check.mjs",
+    "test:model": "node --test tests/scene-model.test.mjs tests/history-manager.test.mjs tests/snapping-and-layers.test.mjs tests/style-state.test.mjs tests/free-layer-state.test.mjs tests/layout-diagnostics.test.mjs"
+  },
+  "dependencies": {
+    "fabric": "7.4.0",
+    "playwright-core": "1.64.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}

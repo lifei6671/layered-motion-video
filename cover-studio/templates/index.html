@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111214">
+  <title>封面工坊 · 本地标题封面生成器</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script defer src="{{ url_for('static', filename='app.js') }}"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-symbol" aria-hidden="true">封</div>
+      <div class="brand-copy">
+        <div class="brand-name">封面工坊 <span class="tag">LOCAL STUDIO</span></div>
+        <div class="brand-note">固定模板 · 书法排版 · 高清输出</div>
+      </div>
+      <a class="current-editor-link" href="{{ url_for('index') }}">打开可视化编辑器 <span aria-hidden="true">↗</span></a>
+      <span class="connection"><span class="connection-dot"></span>经典版 · 本地运行</span>
+    </header>
+
+    <main class="workspace">
+      <aside class="editor-panel">
+        <div class="editor-header">
+          <div>
+            <div class="eyebrow">COVER EDITOR / 01</div>
+            <h1>编辑封面</h1>
+          </div>
+          <span class="tiny-note">修改后自动预览</span>
+        </div>
+        <form id="coverForm" autocomplete="off" novalidate>
+          <section class="field-section">
+            <div class="section-caption"><span class="section-number">01</span><h2>封面文案</h2></div>
+            <label class="field-label" for="title">大标题 <span>自动换行 · 可独立拖动</span></label>
+            <textarea id="title" name="title" rows="2" maxlength="80" spellcheck="false">复利思维</textarea>
+            <div class="text-location" id="titleLocation">
+              <div><label class="small-label" for="titleX">横向位置（%）</label><input id="titleX" type="number" min="0" max="100" step="0.01" placeholder="自动" inputmode="decimal"></div>
+              <div><label class="small-label" for="titleY">纵向位置（%）</label><input id="titleY" type="number" min="0" max="100" step="0.01" placeholder="自动" inputmode="decimal"></div>
+              <button id="resetTitle" type="button" class="plain-button location-reset">自动居中</button>
+            </div>
+            <label class="field-label" for="subtitle">小标题 <span>支持两行 · 可独立拖动</span></label>
+            <textarea id="subtitle" name="subtitle" rows="2" maxlength="120" spellcheck="false">存款百万不是结束而是开始</textarea>
+            <div class="text-location" id="subtitleLocation">
+              <div><label class="small-label" for="subtitleX">横向位置（%）</label><input id="subtitleX" type="number" min="0" max="100" step="0.01" placeholder="自动" inputmode="decimal"></div>
+              <div><label class="small-label" for="subtitleY">纵向位置（%）</label><input id="subtitleY" type="number" min="0" max="100" step="0.01" placeholder="自动" inputmode="decimal"></div>
+              <button id="resetSubtitle" type="button" class="plain-button location-reset">自动排版</button>
+            </div>
+            <label class="field-label" for="account">账号名称 <span>可拖动 · 可选</span></label>
+            <input id="account" name="account" maxlength="60" value="@咸鱼不翻身" placeholder="例如：@我的账号">
+            <div class="account-location">
+              <div><label class="small-label" for="accountX">横向位置（%）</label><input id="accountX" type="number" min="0" max="100" step="0.1" value="7.2" inputmode="decimal"></div>
+              <div><label class="small-label" for="accountY">纵向位置（%）</label><input id="accountY" type="number" min="0" max="100" step="0.1" value="68" inputmode="decimal"></div>
+              <button id="resetAccount" type="button" class="plain-button location-reset">复位</button>
+            </div>
+            <p class="field-hint">三块文字均可在右侧封面中独立拖动。大标题复位后恢复居中排版；小标题与分隔线同步移动。点击文字并按方向键可微调。</p>
+          </section>
+
+          <section class="field-section">
+            <div class="section-caption"><span class="section-number">02</span><h2>画幅比例</h2></div>
+            <div class="ratio-grid" role="group" aria-label="选择封面画幅">
+              <button type="button" class="ratio-choice" data-ratio="9:16"><span>9:16</span><small>竖屏</small></button>
+              <button type="button" class="ratio-choice selected" data-ratio="3:4"><span>3:4</span><small>竖版</small></button>
+              <button type="button" class="ratio-choice" data-ratio="4:5"><span>4:5</span><small>图文</small></button>
+              <button type="button" class="ratio-choice" data-ratio="1:1"><span>1:1</span><small>方形</small></button>
+              <button type="button" class="ratio-choice" data-ratio="4:3"><span>4:3</span><small>横版</small></button>
+              <button type="button" class="ratio-choice" data-ratio="16:9"><span>16:9</span><small>视频</small></button>
+            </div>
+            <p id="ratioSize" class="field-hint">1080 × 1440 像素</p>
+          </section>
+
+          <section class="field-section">
+            <div class="section-caption"><span class="section-number">03</span><h2>背景与头像</h2></div>
+            <div class="asset-row">
+              <div class="asset-head"><label for="background">背景图片</label><button type="button" class="plain-button" data-clear="background">移除</button></div>
+              <input id="background" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">
+              <p id="backgroundStatus" class="field-hint">未上传时使用内置黑色光晕背景</p>
+            </div>
+            <div class="asset-row">
+              <div class="asset-head"><label for="avatar">圆形头像</label><button type="button" class="plain-button" data-clear="avatar">移除</button></div>
+              <input id="avatar" type="file" accept=".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp">
+              <p id="avatarStatus" class="field-hint">可选；自动居中裁切为圆形</p>
+            </div>
+          </section>
+
+          <section class="field-section">
+            <div class="section-caption"><span class="section-number">04</span><h2>字体配置</h2></div>
+            <div class="font-library">
+              <div><strong>项目字体库</strong><p class="field-hint">将开源字体放入 <code>cover-studio/fonts/</code>，每个子目录是一套字体，支持 TTF、OTF、TTC、OTC、WOFF 和 WOFF2，并自动识别规格。</p></div>
+              <button id="refreshFonts" type="button" class="button button-small">刷新字体列表</button>
+            </div>
+            <p id="localFontCount" class="field-hint">正在扫描字体目录…</p>
+            <div class="font-card">
+              <div class="font-card-title">大标题字体</div>
+              <select id="titleFontMode" aria-label="大标题字体来源">
+                <option value="local">项目目录字体</option>
+                <option value="system">系统已安装字体</option>
+              </select>
+              <div class="font-family-row" id="titleFontFamilyRow" hidden>
+                <label class="font-family-label" id="titleFontFamilyLabel">字体家族 <span>点击展开，直接比较字体效果</span></label>
+                <div class="font-family-picker" id="titleFontFamilyPicker">
+                  <select id="titleFontFamily" hidden aria-hidden="true" tabindex="-1"></select>
+                  <button id="titleFontFamilyTrigger" type="button" class="font-picker-trigger family-picker-trigger"
+                          aria-haspopup="listbox" aria-controls="titleFontFamilyOptions"
+                          aria-labelledby="titleFontFamilyLabel titleFontFamilyName" aria-expanded="false">
+                    <span class="family-trigger-inner">
+                      <span class="font-sample-box">
+                        <img id="titleFontFamilyPreview" class="font-sample-image" alt="" hidden>
+                      </span>
+                      <span class="family-trigger-meta">
+                        <span id="titleFontFamilyName" class="font-selected-name">选择字体家族</span>
+                        <span id="titleFontFamilyBadge" class="font-selected-sub">选择字体后可继续选择字重</span>
+                      </span>
+                    </span>
+                    <span class="font-picker-chevron" aria-hidden="true">⌄</span>
+                  </button>
+                  <div id="titleFontFamilyMenu" class="font-picker-menu" hidden>
+                    <input id="titleFontFamilySearch" type="search" placeholder="搜索字体家族..."
+                           aria-label="搜索大标题字体家族">
+                    <div id="titleFontFamilyOptions" class="font-option-list family-option-list" role="listbox"
+                         aria-label="大标题字体家族选项"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="font-variant-caption" id="titleFontVariantCaption">字形与字重规格</div>
+              <div class="font-picker" id="titleFontPicker">
+                <select id="titleFont" hidden aria-hidden="true" tabindex="-1"></select>
+                <button id="titleFontTrigger" type="button" class="font-picker-trigger"
+                        aria-haspopup="listbox" aria-controls="titleFontOptions" aria-expanded="false">
+                  <span class="font-trigger-content font-trigger-inline">
+                    <span class="font-sample-box">
+                      <img id="titleFontPreview" class="font-sample-image" alt="" hidden>
+                    </span>
+                    <span class="font-trigger-meta">
+                      <span class="font-selected-name" id="titleFontName">选择字体</span>
+                      <span id="titleFontBadge" class="font-coverage-badge"></span>
+                    </span>
+                  </span>
+                  <span class="font-picker-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <div id="titleFontMenu" class="font-picker-menu" hidden>
+                  <input id="titleFontSearch" type="search" placeholder="搜索字体名称或文件名…"
+                         aria-label="搜索大标题字体">
+                  <div id="titleFontOptions" class="font-option-list" role="listbox"
+                       aria-label="大标题字体选项"></div>
+                </div>
+              </div>
+            </div>
+            <div class="font-card">
+              <div class="font-card-title">小标题与账号字体</div>
+              <select id="subtitleFontMode" aria-label="小标题与账号字体来源">
+                <option value="local">项目目录字体</option>
+                <option value="system">系统已安装字体</option>
+              </select>
+              <div class="font-family-row" id="subtitleFontFamilyRow" hidden>
+                <label class="font-family-label" id="subtitleFontFamilyLabel">字体家族 <span>点击展开，直接比较字体效果</span></label>
+                <div class="font-family-picker" id="subtitleFontFamilyPicker">
+                  <select id="subtitleFontFamily" hidden aria-hidden="true" tabindex="-1"></select>
+                  <button id="subtitleFontFamilyTrigger" type="button" class="font-picker-trigger family-picker-trigger"
+                          aria-haspopup="listbox" aria-controls="subtitleFontFamilyOptions"
+                          aria-labelledby="subtitleFontFamilyLabel subtitleFontFamilyName" aria-expanded="false">
+                    <span class="family-trigger-inner">
+                      <span class="font-sample-box">
+                        <img id="subtitleFontFamilyPreview" class="font-sample-image" alt="" hidden>
+                      </span>
+                      <span class="family-trigger-meta">
+                        <span id="subtitleFontFamilyName" class="font-selected-name">选择字体家族</span>
+                        <span id="subtitleFontFamilyBadge" class="font-selected-sub">选择字体后可继续选择字重</span>
+                      </span>
+                    </span>
+                    <span class="font-picker-chevron" aria-hidden="true">⌄</span>
+                  </button>
+                  <div id="subtitleFontFamilyMenu" class="font-picker-menu" hidden>
+                    <input id="subtitleFontFamilySearch" type="search" placeholder="搜索字体家族..."
+                           aria-label="搜索小标题与账号字体家族">
+                    <div id="subtitleFontFamilyOptions" class="font-option-list family-option-list" role="listbox"
+                         aria-label="小标题与账号字体家族选项"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="font-variant-caption" id="subtitleFontVariantCaption">字形与字重规格</div>
+              <div class="font-picker" id="subtitleFontPicker">
+                <select id="subtitleFont" hidden aria-hidden="true" tabindex="-1"></select>
+                <button id="subtitleFontTrigger" type="button" class="font-picker-trigger"
+                        aria-haspopup="listbox" aria-controls="subtitleFontOptions" aria-expanded="false">
+                  <span class="font-trigger-content font-trigger-inline">
+                    <span class="font-sample-box">
+                      <img id="subtitleFontPreview" class="font-sample-image" alt="" hidden>
+                    </span>
+                    <span class="font-trigger-meta">
+                      <span class="font-selected-name" id="subtitleFontName">选择字体</span>
+                      <span id="subtitleFontBadge" class="font-coverage-badge"></span>
+                    </span>
+                  </span>
+                  <span class="font-picker-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <div id="subtitleFontMenu" class="font-picker-menu" hidden>
+                  <input id="subtitleFontSearch" type="search" placeholder="搜索字体名称或文件名…"
+                         aria-label="搜索小标题与账号字体">
+                  <div id="subtitleFontOptions" class="font-option-list" role="listbox"
+                       aria-label="小标题与账号字体选项"></div>
+                </div>
+              </div>
+            </div>
+            <p class="field-hint">展开下拉框就能直接看到各字体的真实字形；先选家族，再按效果挑选字重和文件格式。</p>
+          </section>
+
+          <section class="field-section">
+            <div class="section-caption"><span class="section-number">05</span><h2>氛围微调</h2></div>
+            <div class="slider-label"><label for="darkness">背景压暗</label><output id="darknessValue">78%</output></div>
+            <input id="darkness" type="range" min="0" max="95" value="78">
+            <div class="slider-label"><label for="focusY">背景裁切重心</label><output id="focusYValue">50%</output></div>
+            <input id="focusY" type="range" min="0" max="100" value="50">
+            <label class="check-label" for="glow"><input id="glow" type="checkbox" checked>顶部保留柔和灰白光晕</label>
+          </section>
+        </form>
+        <div class="action-bar">
+          <button id="savePreset" class="button button-outline" type="button">保存为默认模板</button>
+          <button id="refreshPreview" class="button button-primary" type="button">重新生成预览 <span aria-hidden="true">↗</span></button>
+        </div>
+        <p class="save-note">保存模板后，背景、头像、字体与三块文字的位置会保留在本机；下次只需修改文案。</p>
+      </aside>
+
+      <section class="preview-panel">
+        <div class="preview-header">
+          <div>
+            <div class="eyebrow">LIVE PREVIEW / 02</div>
+            <h2>封面预览</h2>
+          </div>
+          <span id="renderState" class="render-state">准备中…</span>
+        </div>
+        <div class="preview-stage">
+          <div class="preview-frame" id="previewFrame">
+            <img id="previewImage" alt="生成的标题封面预览" hidden>
+            <div id="titleDragHandle" class="text-drag-handle title-drag-handle" role="button" tabindex="0"
+                 aria-label="拖动大标题修改位置，使用方向键微调" title="拖动大标题" hidden>
+              <img id="titleLayerImage" class="text-layer-image" alt="" draggable="false">
+            </div>
+            <div id="subtitleDragHandle" class="text-drag-handle subtitle-drag-handle" role="button" tabindex="0"
+                 aria-label="拖动小标题及分隔线修改位置，使用方向键微调" title="拖动小标题与分隔线" hidden>
+              <img id="subtitleLayerImage" class="text-layer-image" alt="" draggable="false">
+            </div>
+            <div id="accountDragHandle" class="account-drag-handle" role="button" tabindex="0"
+                 aria-label="拖动账号文字修改位置，使用方向键微调" title="拖动账号位置" hidden>
+              <img id="accountLayerImage" alt="" draggable="false">
+            </div>
+            <div id="previewPlaceholder" class="preview-placeholder"><span class="placeholder-character">封</span><span>正在准备预览</span></div>
+            <div id="loadingCover" class="preview-loading hidden" role="status">正在排版…</div>
+          </div>
+        </div>
+        <div class="preview-footer">
+          <div class="preview-metadata">
+            <span id="outputSize">1080 × 1440</span>
+            <span id="layoutInfo">PNG · 高清导出</span>
+          </div>
+          <button id="downloadCover" class="button button-download" type="button" disabled>下载 PNG 封面 <span aria-hidden="true">↓</span></button>
+          <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+        </div>
+        <p class="preview-tip">大标题、小标题及账号可独立拖动，预览与最终 PNG 均由 Python 绘制。服务仅监听本机 127.0.0.1。</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

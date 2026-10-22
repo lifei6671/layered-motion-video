@@ -1,0 +1,9 @@
+# 本地模板素材、字体、配置和运行时产物
+data/
+output/
+.venv/
+
+# Fabric.js 技术验证：本地依赖及构建产物
+fabric-poc/node_modules/
+static/fabric-poc.bundle.js
+static/fabric-poc.bundle.js.map
