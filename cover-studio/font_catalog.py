@@ -184,6 +184,7 @@ def public_catalog() -> dict:
             "monospace": font["monospace"],
             "italic": font["italic"],
             "format": font["format"],
+            "webFormat": "WOFF2",
             "filename": font["filename"],
             "relative_path": font["relative_path"],
             **get_font_preview_info(font["path"]),
@@ -199,7 +200,8 @@ def public_catalog() -> dict:
             for name, count in sorted(family_counts.items(), key=lambda pair: pair[0].casefold())
         ],
         "fonts": local_entries + [
-            {"id": font["id"], "name": font["name"], "source": "system"}
+            {"id": font["id"], "name": font["name"], "source": "system",
+             **get_font_preview_info(font["path"])}
             for font in system_fonts
         ],
         "defaults": {

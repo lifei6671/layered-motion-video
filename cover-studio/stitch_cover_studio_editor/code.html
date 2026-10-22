@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "surface-container": "#efedf1", "tertiary-fixed": "#d8e2ff", "on-primary-container": "#eeefff", "primary-fixed-dim": "#b4c5ff", "on-tertiary-container": "#edf0ff", "tertiary": "#0051b1", "error-container": "#ffdad6", "on-secondary": "#ffffff", "surface-container-low": "#f4f3f7", "surface-bright": "#faf9fd", "on-secondary-container": "#fffbff", "surface-container-high": "#e9e7eb", "surface-container-lowest": "#ffffff", "primary-container": "#2563eb", "on-tertiary": "#ffffff", "secondary-fixed-dim": "#b7c4ff", "tertiary-fixed-dim": "#adc6ff", "on-secondary-fixed-variant": "#0039b5", "primary-fixed": "#dbe1ff", "on-secondary-fixed": "#001551", "on-error": "#ffffff", "on-surface": "#1a1b1e", "inverse-surface": "#2f3033", "on-tertiary-fixed": "#001a42", "on-background": "#1a1b1e", "inverse-on-surface": "#f1f0f4", "on-primary": "#ffffff", "background": "#faf9fd", "secondary": "#1d4ed8", "on-surface-variant": "#434655", "surface-container-highest": "#e3e2e6", "error": "#ba1a1a", "inverse-primary": "#b4c5ff", "surface": "#faf9fd", "outline": "#737686", "surface-tint": "#0053db", "on-tertiary-fixed-variant": "#004395", "secondary-container": "#4069f2", "outline-variant": "#c3c6d7", "secondary-fixed": "#dce1ff", "tertiary-container": "#0f69dc", "surface-dim": "#dbd9dd", "on-primary-fixed-variant": "#003ea8", "on-primary-fixed": "#00174b", "primary": "#004ac6", "surface-variant": "#e3e2e6", "on-error-container": "#93000a" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter-sm": "0.5rem", "space-md": "0.75rem", "gutter": "1rem", "space-xs": "0.25rem", "gutter-lg": "1.5rem", "space-lg": "1rem", "space-xl": "1.5rem", "margin-lg": "2rem", "space-sm": "0.5rem", "margin": "1.5rem", "margin-sm": "1rem" }, "fontFamily": { "headline-md": ["Inter"], "headline-lg": ["Inter"], "body-md": ["Inter"], "headline-sm": ["Inter"], "label-md": ["Inter"], "body-sm": ["Inter"], "label-lg": ["Inter"], "body-lg": ["Inter"], "headline-xl": ["Inter"], "label-sm": ["Inter"], "caption": ["Inter"] }, "fontSize": { "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-sm": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }], "label-lg": ["13px", { "lineHeight": "18px", "fontWeight": "500" }], "body-lg": ["15px", { "lineHeight": "22px", "fontWeight": "400" }], "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.02em", "fontWeight": "500" }], "caption": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "600" }] } } } };</script></head><body class="bg-background font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 h-14 bg-surface-container-lowest z-50 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-14 w-full px-gutter flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-xs"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">layers</span></div><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight ml-space-xs">Cover Studio</span></div><div class="h-4 w-[1px] bg-outline-variant/60 mx-space-xs"></div><div class="group flex items-center gap-space-xs px-space-sm py-1 rounded hover:bg-surface-container-low transition-colors cursor-pointer"><span class="font-label-lg text-label-lg text-on-surface select-none">认知盲区 - 叙事封面</span><span class="material-symbols-outlined text-outline text-[16px] opacity-0 group-hover:opacity-100 transition-opacity">edit</span></div><div class="flex items-center gap-space-xs text-outline px-space-xs"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span class="font-label-sm text-label-sm text-on-surface-variant">已保存</span></div></div><div class="hidden lg:flex items-center gap-space-md"><div class="flex items-center bg-surface-container-low rounded-lg p-0.5"><button class="w-7 h-7 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors" title="撤销 (Ctrl+Z)" type="button"><span class="material-symbols-outlined text-[18px]">undo</span></button><button class="w-7 h-7 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container-lowest transition-colors" title="重做 (Ctrl+Y)" type="button"><span class="material-symbols-outlined text-[18px]">redo</span></button></div><button class="flex items-center gap-space-xs bg-surface-container-low hover:bg-surface-container-high px-space-md py-1.5 rounded-lg text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[16px] text-outline">aspect_ratio</span><span class="font-label-md text-label-md font-medium">16:9 封面 (1920×1080)</span><span class="material-symbols-outlined text-[16px] text-outline">expand_more</span></button><button class="w-8 h-8 flex items-center justify-center rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" title="辅助网格与吸附" type="button"><span class="material-symbols-outlined text-[20px]">grid_view</span></button></div><div class="flex items-center gap-space-md"><button class="flex items-center gap-space-xs px-space-md py-1.5 rounded-lg text-on-surface hover:bg-surface-container-low transition-colors" type="button"><span class="material-symbols-outlined text-[18px] text-on-surface-variant">visibility</span><span class="font-label-lg text-label-lg font-medium">预览</span></button><button class="flex items-center gap-space-xs bg-primary-container hover:bg-secondary text-on-primary px-space-lg py-1.5 rounded-lg font-medium shadow-sm transition-all active:scale-[0.99]" type="button"><span class="material-symbols-outlined text-[18px]">download</span><span class="font-label-lg text-label-lg">导出封面</span></button><div class="h-4 w-[1px] bg-outline-variant/60"></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><aside class="fixed left-0 top-14 bottom-0 w-[72px] bg-surface-container-lowest z-40 flex flex-col justify-between py-space-md shadow-[1px_0_8px_rgba(0,0,0,0.03)]"><nav class="flex flex-col gap-space-xs px-space-xs" data-active-classes="bg-primary-container text-on-primary"><a class="flex flex-col items-center justify-center py-space-sm px-1 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group" data-path="templates" href="#"><span class="material-symbols-outlined text-[22px] mb-0.5">auto_awesome_motion</span><span class="font-label-sm text-label-sm">模板</span></a><a class="flex flex-col items-center justify-center py-space-sm px-1 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group" data-path="backgrounds" href="#"><span class="material-symbols-outlined text-[22px] mb-0.5">wallpaper</span><span class="font-label-sm text-label-sm">背景</span></a><a class="flex flex-col items-center justify-center py-space-sm px-1 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group" data-path="text" href="#"><span class="material-symbols-outlined text-[22px] mb-0.5">title</span><span class="font-label-sm text-label-sm">文字</span></a><a class="flex flex-col items-center justify-center py-space-sm px-1 rounded-xl text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-all group" data-path="elements" href="#"><span class="material-symbols-outlined text-[22px] mb-0.5">category</span><span class="font-label-sm text-label-sm">素材</span></a><a aria-current="page" class="flex flex-col items-center justify-center py-space-sm px-1 rounded-xl transition-all group bg-primary-container text-on-primary" data-path="layers" href="#"><span class="material-symbols-outlined text-[22px] mb-0.5">stacks</span><span class="font-label-sm text-label-sm">图层</span></a></nav><div class="flex flex-col items-center gap-space-xs px-space-xs"><button class="w-10 h-10 flex items-center justify-center rounded-xl text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors" title="快捷键帮助" type="button"><span class="material-symbols-outlined text-[20px]">keyboard</span></button><button class="w-10 h-10 flex items-center justify-center rounded-xl text-outline hover:text-on-surface hover:bg-surface-container-low transition-colors" title="画布偏好设置" type="button"><span class="material-symbols-outlined text-[20px]">settings</span></button></div></aside><div class="pl-[72px]"><main class="relative pt-14 min-h-screen bg-background"><div class="flex flex-col w-full select-none text-on-surface">
+<div class="flex h-[calc(100vh-56px)] w-full overflow-hidden bg-surface-container-low">
+<!-- 1. 左侧次级轻量图层与资源面板 (220px) -->
+<aside class="w-[220px] flex-shrink-0 bg-surface-container-lowest flex flex-col justify-between shadow-sm z-20">
+<div class="flex flex-col h-full overflow-y-auto">
+<!-- 图层头部 -->
+<div class="px-space-md py-space-sm flex items-center justify-between bg-surface-container-lowest">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-lg text-label-lg font-semibold text-on-surface tracking-tight">图层</span>
+<span class="px-1.5 py-0.2 rounded-full bg-surface-container text-on-surface-variant font-caption text-caption">4</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<button class="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-low hover:text-on-surface transition-colors" title="全部锁定/解锁" type="button">
+<span class="material-symbols-outlined text-[16px]">lock_open</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-low hover:text-on-surface transition-colors" title="新建文本图层" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+</div>
+<!-- 图层列表 -->
+<div class="flex flex-col py-space-xs px-1.5 gap-0.5">
+<!-- 图层 1: 大标题 (高亮选中态) -->
+<div class="relative flex items-center justify-between px-2.5 py-2 rounded-lg bg-surface-container-low cursor-pointer shadow-sm group">
+<div class="absolute left-0 top-1.5 bottom-1.5 w-1 bg-primary-container rounded-r"></div>
+<div class="flex items-center gap-2 min-w-0 pl-1">
+<span class="material-symbols-outlined text-primary-container text-[18px] flex-shrink-0">title</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-lg text-label-lg text-on-surface font-semibold truncate leading-tight">认知的盲区</span>
+<span class="font-caption text-caption text-primary-container font-medium">特粗黑体 · 88px</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant hover:text-on-surface">visibility</span>
+<span class="material-symbols-outlined text-[16px] text-outline hover:text-on-surface">lock_open</span>
+</div>
+</div>
+<!-- 图层 2: 副标题 -->
+<div class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant hover:text-on-surface group">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface flex-shrink-0">subtitles</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate leading-tight">大脑如何悄悄欺骗我们</span>
+<span class="font-caption text-caption text-outline">思源黑体 · 36px</span>
+</div>
+</div>
+<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px] text-outline hover:text-on-surface">visibility</span>
+<span class="material-symbols-outlined text-[16px] text-outline hover:text-on-surface">lock_open</span>
+</div>
+</div>
+<!-- 图层 3: 微标与作者 -->
+<div class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant hover:text-on-surface group">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[18px] text-outline group-hover:text-on-surface flex-shrink-0">pill</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate leading-tight">思考实验室 胶囊组</span>
+<span class="font-caption text-caption text-outline">复合容器 · VOL.42</span>
+</div>
+</div>
+<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px] text-outline hover:text-on-surface">visibility</span>
+<span class="material-symbols-outlined text-[16px] text-outline hover:text-on-surface">lock_open</span>
+</div>
+</div>
+<!-- 图层 4: 背景图层 (锁定) -->
+<div class="flex items-center justify-between px-2.5 py-2 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer text-on-surface-variant hover:text-on-surface group">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[18px] text-outline flex-shrink-0">image</span>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface truncate leading-tight">黑白漫画特写插画</span>
+<span class="font-caption text-caption text-outline">1920×1080 · 居底</span>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">visibility</span>
+<span class="material-symbols-outlined text-[16px] text-outline">lock</span>
+</div>
+</div>
+</div>
+<!-- 快速预设模块 -->
+<div class="mt-auto p-space-md bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm font-semibold text-outline uppercase tracking-wider">推荐模版预设</span>
+<span class="material-symbols-outlined text-outline text-[16px] cursor-pointer hover:text-on-surface">tune</span>
+</div>
+<div class="grid grid-cols-2 gap-space-xs">
+<div class="group relative rounded-lg overflow-hidden bg-surface-container aspect-video cursor-pointer shadow-sm">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" data-alt="Minimalist cinematic monochrome YouTube cover template thumbnail with intense lighting and structured typography in high contrast." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDV64zvDGqsFqslHUFWQfezlTF3siFTtgkoZsnNlDcdV1PWppMwpOqtGKaRc0ofdMVHYrYDZ77uXalKq_aoCkbAjHRm-LFbAFjEGkZy8MfBk-L8fDmTqZXvLijjnY1B5qknjZFUPrRKozJu9gwSBdckKUFw8sP9qlx2duxIPkMl9T3JGzU3yDKWA2mt3oibHpo_HXNY-gWBEcxg2Ssl3Z32Juky1ipqGyCZngt7vFcmzVBc1iPCLqcf')"></div>
+<div class="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="font-caption text-caption text-surface-container-lowest font-medium bg-on-surface/80 px-1.5 py-0.5 rounded">应用</span>
+</div>
+</div>
+<div class="group relative rounded-lg overflow-hidden bg-surface-container aspect-video cursor-pointer shadow-sm">
+<div class="w-full h-full bg-cover bg-center group-hover:scale-105 transition-transform duration-300" data-alt="High tech deep blue cyber style video thumbnail preview template with glowing typography elements and abstract geometry." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAlafS4oAT-R9ohvJ1qP_rF63Wm6CQ-aWI5iXQ1qnUlXR5tXSTd5p6upsPJyd5j-c7Wv9CxUfjkk_dniJ9yBHIHZ-GfRYBixqkJURTtIhqvqSUJAmwrLopnBGMhGUY5HcYFQytnIxi16ExRgABbTHbqdHY9v46mHjf7kuIk6-Y4jEzdWxPGBMX7cxchewU7py93V03GS3Cd1uNIiOpgSzjqyYahxQI9pUOhdyb2BcNFrTCnX75HqHPu')"></div>
+<div class="absolute inset-0 bg-on-surface/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<span class="font-caption text-caption text-surface-container-lowest font-medium bg-on-surface/80 px-1.5 py-0.5 rounded">应用</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- 2. 中央宽敞的封面画布区域 -->
+<main class="flex-1 flex flex-col relative overflow-hidden bg-surface-container" style="background-image: radial-gradient(rgba(115, 118, 134, 0.15) 1px, transparent 1px); background-size: 24px 24px;">
+<!-- 画布顶部悬浮工具条 -->
+<div class="absolute top-space-md left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 px-space-sm py-1 rounded-full bg-surface-container-lowest/95 backdrop-blur-md shadow-md">
+<button class="w-7 h-7 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="左对齐" type="button">
+<span class="material-symbols-outlined text-[18px]">align_horizontal_left</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded-full text-primary-container bg-surface-container transition-colors" title="水平居中对齐" type="button">
+<span class="material-symbols-outlined text-[18px]">align_horizontal_center</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="右对齐" type="button">
+<span class="material-symbols-outlined text-[18px]">align_horizontal_right</span>
+</button>
+<div class="w-[1px] h-3.5 bg-outline-variant mx-1"></div>
+<button class="flex items-center gap-1 px-2 py-0.5 rounded-full text-primary-container bg-surface-container font-label-sm text-label-sm font-medium" title="智能磁吸 (开)" type="button">
+<span class="material-symbols-outlined text-[16px]">qr_code_2</span>
+<span>吸附开</span>
+</button>
+<button class="w-7 h-7 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" title="画布辅助网格" type="button">
+<span class="material-symbols-outlined text-[18px]">grid_4x4</span>
+</button>
+</div>
+<!-- 画布居中视口 Stage -->
+<div class="flex-1 flex items-center justify-center p-gutter lg:p-gutter-lg overflow-auto">
+<!-- 16:9 画布外壳 (缩放比 72% 视图，宽 860px 高 484px) -->
+<div class="relative w-[860px] h-[484px] bg-on-surface rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] overflow-hidden flex-shrink-0 group/canvas">
+<!-- 画布底图：电影感黑白漫画插画 -->
+<div class="absolute inset-0 bg-cover bg-center filter contrast-125 brightness-95" data-alt="Dramatic black and white graphic novel ink illustration of a mysterious detective wearing a fedora hat looking intense, film noir aesthetic, extreme rim lighting, cinematic grain and dark shadows." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCLCOCPeFGsnl5bcSI_9AWNL990zfV2Hy-yfD3fRZZtvzLfQyWuVs9_v-xFoKErpGBlRFPZATljPTtseB-QtiO8owOYRB0vhptg8NmIdTCavXpeaR_2ygbRk4y9lEHf3jNSdELvAbcQMPHODN6x7BHt6XDMRI4xne9XNZq6zFdGl3I97rcmZnhYEqVX8VuVCOpcpSCK4x4gc3mZ96cwkQ-jzfDE538g9Cqh6xn_fcmIMHr0HaPDXmvX')"></div>
+<!-- 电影感暗角与阴影渐变遮罩 -->
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/90 via-transparent to-on-surface/40 pointer-events-none"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-on-surface/70 via-transparent to-on-surface/70 pointer-events-none"></div>
+<!-- 智能居中贯穿对齐辅助线 (Smart Guide Lines) -->
+<div class="absolute left-1/2 top-0 bottom-0 w-[1.5px] bg-primary-container/80 z-20 pointer-events-none -translate-x-1/2"></div>
+<div class="absolute top-[228px] left-0 right-0 h-[1.5px] bg-primary-container/80 z-20 pointer-events-none -translate-y-1/2"></div>
+<!-- 顶部品牌微标识 -->
+<div class="absolute top-6 left-8 flex items-center gap-2 z-10">
+<span class="w-2 h-2 rounded-full bg-primary-container shadow-sm"></span>
+<span class="font-label-sm text-label-sm tracking-widest text-surface-bright/80 font-bold uppercase">MINDLAB RESEARCH</span>
+</div>
+<!-- 选中状态的大标题容器 & 浮动工具栏 -->
+<div class="absolute left-1/2 top-[228px] -translate-x-1/2 -translate-y-1/2 z-30 cursor-move">
+<!-- 浮动操作手柄栏 (紧贴大标题上方) -->
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-space-sm py-1 bg-surface-container-lowest text-on-surface rounded-full shadow-lg z-40 whitespace-nowrap">
+<div class="flex items-center gap-1 px-2 py-0.5 rounded hover:bg-surface-container text-on-surface font-label-md text-label-md font-semibold cursor-pointer">
+<span>造字工房尚黑</span>
+<span class="material-symbols-outlined text-[14px] text-outline">expand_more</span>
+</div>
+<div class="w-[1px] h-3 bg-outline-variant"></div>
+<span class="font-label-md text-label-md font-bold px-1 text-primary-container">88px</span>
+<div class="w-[1px] h-3 bg-outline-variant"></div>
+<div class="w-4 h-4 rounded-full bg-surface-container-lowest shadow-inner cursor-pointer" title="文字颜色: 纯白"></div>
+<div class="w-[1px] h-3 bg-outline-variant"></div>
+<button class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[15px]">format_align_center</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[15px]">content_copy</span>
+</button>
+<button class="w-6 h-6 flex items-center justify-center rounded hover:bg-error-container text-error" type="button">
+<span class="material-symbols-outlined text-[15px]">delete</span>
+</button>
+</div>
+<!-- 选中框边界 (1.5px solid #2563EB) -->
+<div class="relative px-6 py-2.5 outline outline-2 outline-primary-container bg-primary-container/5 rounded-sm">
+<!-- 大标题文本内容 -->
+<h1 class="text-[64px] font-headline-xl font-black text-surface-container-lowest tracking-tight select-none whitespace-nowrap" style="text-shadow: 0 12px 30px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.9); -webkit-text-stroke: 1.5px #0a0c10;">
+                认知的盲区
+              </h1>
+<!-- 尺寸提示标签 -->
+<div class="absolute -bottom-6 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded bg-primary-container text-on-primary font-caption text-caption font-semibold tracking-wide shadow-sm">
+                724 × 106 px
+              </div>
+<!-- 8个白色高精圆形缩放控制手柄 -->
+<div class="absolute -top-1.5 -left-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-nwse-resize"></div>
+<div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-ns-resize"></div>
+<div class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-nesw-resize"></div>
+<div class="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-ew-resize"></div>
+<div class="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-ew-resize"></div>
+<div class="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-nesw-resize"></div>
+<div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-ns-resize"></div>
+<div class="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-surface-container-lowest rounded-full shadow-sm ring-2 ring-primary-container cursor-nwse-resize"></div>
+</div>
+</div>
+<!-- 封面副标题 (层级清晰优雅) -->
+<div class="absolute left-1/2 top-[320px] -translate-x-1/2 z-20 text-center whitespace-nowrap">
+<p class="font-headline-md text-headline-md font-medium text-surface-bright tracking-widest uppercase drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]">
+              — 大脑如何悄悄欺骗我们 —
+            </p>
+</div>
+<!-- 封面底部信息区 -->
+<div class="absolute bottom-6 left-8 right-8 flex items-center justify-between z-20">
+<!-- 药丸徽标 -->
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-lowest/20 backdrop-blur-md shadow-sm">
+<span class="text-[14px]">💡</span>
+<span class="font-label-sm text-label-sm font-semibold text-surface-container-lowest tracking-wide">思考实验室 · VOL.42 · 认知科学特辑</span>
+</div>
+<!-- 时长与画质标签 -->
+<div class="flex items-center gap-2 px-3 py-1 rounded-lg bg-on-surface/80 backdrop-blur-md text-surface-container-highest font-caption text-caption tracking-wider">
+<span class="text-primary-fixed-dim font-bold">▶ 深度解读 24:18</span>
+<span class="text-outline">|</span>
+<span class="font-bold">1080P MASTER</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 画布底部浮动控制栏 (快捷视口操纵) -->
+<div class="absolute bottom-space-md left-1/2 -translate-x-1/2 z-30 flex items-center gap-space-sm px-space-md py-1.5 rounded-full bg-surface-container-lowest/95 backdrop-blur-md shadow-md text-on-surface">
+<div class="flex items-center gap-1">
+<button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[16px]">remove</span>
+</button>
+<span class="font-label-md text-label-md font-bold px-1.5 text-on-surface">72%</span>
+<button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[16px]">add</span>
+</button>
+</div>
+<div class="w-[1px] h-3.5 bg-outline-variant"></div>
+<button class="flex items-center gap-1 px-2 py-0.5 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm" type="button">
+<span class="material-symbols-outlined text-[16px]">fit_screen</span>
+<span>适应视口</span>
+</button>
+<div class="w-[1px] h-3.5 bg-outline-variant"></div>
+<button class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="全屏预览 (F)" type="button">
+<span class="material-symbols-outlined text-[16px]">fullscreen</span>
+</button>
+</div>
+</main>
+<!-- 3. 右侧智能属性面板 (约 290px 宽) -->
+<aside class="w-[290px] flex-shrink-0 bg-surface-container-lowest flex flex-col justify-between shadow-sm z-20">
+<div class="flex flex-col h-full overflow-y-auto">
+<!-- 面板标题栏 -->
+<div class="px-space-md py-space-sm flex items-center justify-between bg-surface-container-lowest">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-primary-container text-[18px]">format_shapes</span>
+<span class="font-label-lg text-label-lg font-bold text-on-surface">文本属性</span>
+</div>
+<div class="flex items-center gap-1 text-outline">
+<button class="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-low hover:text-on-surface transition-colors" title="重置样式" type="button">
+<span class="material-symbols-outlined text-[16px]">restart_alt</span>
+</button>
+<button class="w-6 h-6 rounded flex items-center justify-center hover:bg-surface-container-low hover:text-on-surface transition-colors" title="存为预设" type="button">
+<span class="material-symbols-outlined text-[16px]">bookmark_add</span>
+</button>
+</div>
+</div>
+<div class="p-space-md flex flex-col gap-space-lg">
+<!-- 文字内容输入区 -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex justify-between items-center">
+<label class="font-label-sm text-label-sm font-semibold text-on-surface-variant">内容文本</label>
+<span class="font-caption text-caption text-outline">5 字</span>
+</div>
+<textarea class="w-full px-space-sm py-1.5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md resize-none outline-none focus:bg-surface-container-lowest focus:shadow-[0_0_0_2px_#2563eb] transition-all" rows="2">认知的盲区</textarea>
+<!-- 风格标签快捷切换 -->
+<div class="grid grid-cols-2 gap-1.5 mt-1">
+<button class="px-2 py-1 rounded-full bg-primary-container text-on-primary font-caption text-caption font-semibold flex items-center justify-center shadow-sm" type="button">
+                #大片叙事 ✓
+              </button>
+<button class="px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-caption text-caption font-medium transition-colors" type="button">
+                #极简知识
+              </button>
+<button class="px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-caption text-caption font-medium transition-colors" type="button">
+                #悬疑反差
+              </button>
+<button class="px-2 py-1 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container hover:text-on-surface font-caption text-caption font-medium transition-colors" type="button">
+                #爆款冲击
+              </button>
+</div>
+</div>
+<!-- 字体与排版设置 -->
+<div class="flex flex-col gap-space-md">
+<div class="flex justify-between items-center">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface-variant">字体排版</span>
+</div>
+<!-- 字体家族选择 -->
+<div class="flex items-center justify-between px-space-sm py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="flex items-center gap-2 min-w-0">
+<span class="font-label-lg text-label-lg font-bold text-on-surface truncate">造字工房尚黑</span>
+<span class="px-1.5 py-0.2 rounded bg-primary-fixed text-on-primary-fixed font-caption text-caption font-semibold">WOFF2</span>
+</div>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-on-surface">arrow_drop_down</span>
+</div>
+<!-- 字重与字号两列微调 -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<span class="font-caption text-caption text-outline">字重</span>
+<div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md font-semibold cursor-pointer">
+<span>特粗 (800)</span>
+<span class="material-symbols-outlined text-[16px] text-outline">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-caption text-caption text-outline">字号</span>
+<div class="flex items-center justify-between px-2.5 py-1.5 rounded-lg bg-surface-container-low text-on-surface font-label-md text-label-md">
+<span class="font-semibold text-primary-container">88</span>
+<span class="font-caption text-caption text-outline">px</span>
+</div>
+</div>
+</div>
+<!-- 对齐分段控制器与方向 -->
+<div class="flex items-center justify-between gap-1 p-1 rounded-lg bg-surface-container-low">
+<button class="flex-1 py-1 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface transition-colors" title="左对齐" type="button">
+<span class="material-symbols-outlined text-[16px]">format_align_left</span>
+</button>
+<button class="flex-1 py-1 flex items-center justify-center rounded bg-surface-container-lowest text-primary-container shadow-sm" title="居中对齐" type="button">
+<span class="material-symbols-outlined text-[16px]">format_align_center</span>
+</button>
+<button class="flex-1 py-1 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface transition-colors" title="右对齐" type="button">
+<span class="material-symbols-outlined text-[16px]">format_align_right</span>
+</button>
+<button class="flex-1 py-1 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface transition-colors" title="两端分散对齐" type="button">
+<span class="material-symbols-outlined text-[16px]">format_align_justify</span>
+</button>
+<div class="w-[1px] h-3 bg-outline-variant mx-0.5"></div>
+<button class="px-2 py-1 flex items-center justify-center rounded text-on-surface font-caption text-caption font-bold bg-surface-container-lowest shadow-sm" title="横排文本" type="button">
+                横排
+              </button>
+</div>
+<!-- 经典色板选择 -->
+<div class="flex flex-col gap-1.5">
+<div class="flex justify-between items-center">
+<span class="font-caption text-caption text-outline">字色预设</span>
+<span class="font-caption text-caption text-on-surface font-mono">#FFFFFF</span>
+</div>
+<div class="flex items-center justify-between gap-1.5">
+<div class="w-7 h-7 rounded-lg bg-surface-container-lowest ring-2 ring-primary-container shadow-sm cursor-pointer flex items-center justify-center">
+<div class="w-2 h-2 rounded-full bg-primary-container"></div>
+</div>
+<div class="w-7 h-7 rounded-lg bg-[#FDE047] cursor-pointer hover:scale-105 transition-transform"></div>
+<div class="w-7 h-7 rounded-lg bg-[#4ADE80] cursor-pointer hover:scale-105 transition-transform"></div>
+<div class="w-7 h-7 rounded-lg bg-[#F87171] cursor-pointer hover:scale-105 transition-transform"></div>
+<div class="w-7 h-7 rounded-lg bg-[#60A5FA] cursor-pointer hover:scale-105 transition-transform"></div>
+<div class="w-7 h-7 rounded-lg bg-[#1E293B] cursor-pointer hover:scale-105 transition-transform"></div>
+<button class="w-7 h-7 rounded-lg bg-surface-container-low hover:bg-surface-container flex items-center justify-center text-outline hover:text-on-surface" type="button">
+<span class="material-symbols-outlined text-[16px]">colorize</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 常用文字质感与效果 -->
+<div class="flex flex-col gap-space-sm">
+<span class="font-label-sm text-label-sm font-semibold text-on-surface-variant">图层效果</span>
+<!-- 描边 Stroke -->
+<div class="p-2.5 rounded-lg bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-primary-container accent-primary-container cursor-pointer" type="checkbox"/>
+<span class="font-label-md text-label-md font-semibold text-on-surface">外描边 (Stroke)</span>
+</label>
+<span class="font-caption text-caption text-primary-container font-mono font-medium">4 px</span>
+</div>
+<div class="flex items-center justify-between pl-6 gap-2 text-outline">
+<div class="flex items-center gap-1.5">
+<div class="w-3.5 h-3.5 rounded-full bg-[#0F1216]"></div>
+<span class="font-caption text-caption font-mono text-on-surface-variant">#0F1216</span>
+</div>
+<span class="font-caption text-caption text-outline">居外描边</span>
+</div>
+</div>
+<!-- 投影 Shadow -->
+<div class="p-2.5 rounded-lg bg-surface-container-low flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<label class="flex items-center gap-2 cursor-pointer">
+<input checked="" class="w-4 h-4 rounded text-primary-container accent-primary-container cursor-pointer" type="checkbox"/>
+<span class="font-label-md text-label-md font-semibold text-on-surface">电影感立体投影</span>
+</label>
+<span class="font-caption text-caption text-primary-container font-mono font-medium">80% 深度</span>
+</div>
+<div class="flex items-center justify-between pl-6 text-on-surface-variant font-caption text-caption">
+<span>偏移 8px</span>
+<span>模糊 24px</span>
+<span>暗黑纯调</span>
+</div>
+</div>
+</div>
+<!-- 折叠式高级排版微调区 -->
+<div class="flex flex-col gap-2 pt-1">
+<button class="flex items-center justify-between py-1 text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer group" type="button">
+<span class="font-label-md text-label-md font-semibold">高级排版设置</span>
+<span class="material-symbols-outlined text-[16px] text-outline group-hover:text-on-surface">expand_more</span>
+</button>
+<div class="grid grid-cols-2 gap-space-sm p-space-sm rounded-lg bg-surface-container-low">
+<div class="flex items-center justify-between bg-surface-container-lowest px-2 py-1 rounded">
+<span class="font-caption text-caption text-outline">行高</span>
+<span class="font-label-sm text-label-sm font-semibold">1.1</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest px-2 py-1 rounded">
+<span class="font-caption text-caption text-outline">字距</span>
+<span class="font-label-sm text-label-sm font-semibold">4px</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest px-2 py-1 rounded">
+<span class="font-caption text-caption text-outline">X 坐标</span>
+<span class="font-label-sm text-label-sm font-semibold">960</span>
+</div>
+<div class="flex items-center justify-between bg-surface-container-lowest px-2 py-1 rounded">
+<span class="font-caption text-caption text-outline">Y 坐标</span>
+<span class="font-label-sm text-label-sm font-semibold">480</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<!-- 4. 底部轻量状态栏 (28px) -->
+<footer class="h-7 w-full bg-surface-container-lowest flex items-center justify-between px-gutter text-outline font-caption text-caption shadow-[0_-1px_4px_rgba(0,0,0,0.02)] select-none">
+<div class="flex items-center gap-space-md">
+<span class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px] text-primary-container">aspect_ratio</span>
+<span>画布尺寸 1920 × 1080 px (16:9)</span>
+</span>
+<span>•</span>
+<span>当前缩放: 72%</span>
+<span>•</span>
+<span class="hidden sm:inline">色彩配置文件: sRGB Display P3</span>
+</div>
+<div class="flex items-center gap-space-md">
+<span class="hidden md:inline">按住 [空格键] 平移画布</span>
+<span>•</span>
+<span class="hidden md:inline">双击文本图层即刻编辑</span>
+<span>•</span>
+<span class="text-primary-container font-medium cursor-pointer hover:underline">快捷键一览</span>
+</div>
+</footer>
+</div></main></div></body></html>

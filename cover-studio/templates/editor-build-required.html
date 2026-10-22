@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111214">
+  <title>封面工坊 · 编辑器初始化</title>
+  <style>
+    :root {color-scheme:dark;font-family:"Microsoft YaHei","PingFang SC",sans-serif}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#101113;color:#eee8df;padding:24px}
+    main{width:min(100%,570px);padding:34px;background:#1b1c1f;border:1px solid #3b3a38;border-radius:14px}
+    h1{font-size:23px;margin:0 0 15px}
+    p{line-height:1.9;color:#c0bcb4}
+    code{background:#303033;border-radius:4px;padding:3px 5px}
+    a{display:inline-block;color:#e7d6b6;border:1px solid #796c57;border-radius:7px;padding:10px 16px;text-decoration:none}
+  </style>
+</head>
+<body>
+<main>
+  <h1>正在准备封面编辑器</h1>
+  <p>浏览器画布需要先生成本机前端资源。请安装 Node.js 后重新运行 <code>cover-studio/start.bat</code>，程序会自动安装依赖并构建页面。</p>
+  <p>也可以在 <code>cover-studio/fabric-poc</code> 中运行 <code>npm ci --ignore-scripts</code> 和 <code>npm run build</code>，然后刷新网页。</p>
+  <a href="{{ url_for('legacy_editor') }}">打开经典封面编辑器</a>
+</main>
+</body>
+</html>

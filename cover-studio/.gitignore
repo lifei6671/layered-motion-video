@@ -7,3 +7,11 @@ output/
 fabric-poc/node_modules/
 static/fabric-poc.bundle.js
 static/fabric-poc.bundle.js.map
+
+# React editor and Remotion build artifacts
+editor/node_modules/
+editor/.test-build/
+static/editor.bundle.js
+static/editor.bundle.js.map
+static/editor.bundle.css
+static/remotion-cover/

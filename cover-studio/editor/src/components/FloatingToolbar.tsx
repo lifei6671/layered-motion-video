@@ -1,0 +1,11 @@
+import {AlignLeftSimple,AlignCenterHorizontalSimple,AlignRightSimple,Magnet,GridFour,Copy,Trash,TextAlignCenter,LockSimple} from '@phosphor-icons/react';
+import {Layer} from '../model';
+import {IconButton,Hint} from './controls';
+export function FloatingToolbar({onAlign,snap,onSnap,grid,onGrid,disabled=false}:{onAlign:(v:'left'|'center'|'right')=>void;snap:boolean;onSnap:()=>void;grid:boolean;onGrid:()=>void;disabled?:boolean}) {
+  return <div className="floating-toolbar" aria-label="画布快捷操作"><IconButton icon={AlignLeftSimple} label="对象左对齐画布" disabled={disabled} onClick={()=>onAlign('left')}/><IconButton icon={AlignCenterHorizontalSimple} label="对象水平居中" disabled={disabled} onClick={()=>onAlign('center')}/><IconButton icon={AlignRightSimple} label="对象右对齐画布" disabled={disabled} onClick={()=>onAlign('right')}/><i className="divider"/><button className={'snap-toggle'+(snap?' active':'')} onClick={onSnap} aria-pressed={snap}><Magnet size={17}/>吸附{snap?'开':'关'}</button><IconButton icon={GridFour} label="显示网格" active={grid} onClick={onGrid}/></div>;
+}
+export function SelectionToolbar({layer,onCopy,onDelete,onCenter,onText,onColor}:{layer:Layer;onCopy:()=>void;onDelete:()=>void;onCenter:()=>void;onText:()=>void;onColor:(color:string)=>void}) {
+  return <div className="selection-toolbar" onPointerDown={e=>e.stopPropagation()}>
+    {layer.locked?<span><LockSimple size={15}/>已锁定</span>:<>{layer.type==='text'?<button onClick={onText}>{`${Math.round(layer.fontSize)}px · 编辑文字`}</button>:<span>{layer.type==='image'?'图片':'形状'}对象</span>}<i className="divider"/>{layer.type!=='image'&&<Hint content="颜色"><label className="mini-color"><input type="color" aria-label="快捷文字颜色" value={layer.color} onChange={e=>onColor(e.target.value)}/></label></Hint>}<IconButton icon={TextAlignCenter} label="对象居中" onClick={onCenter}/><IconButton icon={Copy} label="复制选中对象" onClick={onCopy}/><IconButton icon={Trash} label="删除选中对象" onClick={onDelete}/></>}
+  </div>;
+}

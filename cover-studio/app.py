@@ -317,7 +317,24 @@ def _persist(context: tuple) -> dict:
 
 @app.get("/")
 def index():
-    """正式的浏览器封面编辑器：预览、图层操作与 PNG 导出均使用 Fabric.js。"""
+    """React 可视化编辑器；画面与 Remotion 静帧复用同一组件。"""
+    bundle = BASE_DIR / "static" / "editor.bundle.js"
+    if not bundle.is_file() or bundle.stat().st_size == 0:
+        return render_template("react-build-required.html"), 503
+    return render_template("editor.html", editor_version=str(bundle.stat().st_mtime_ns))
+
+
+@app.get("/artwork/<ident>")
+def artwork_preview(ident):
+    """独立原图预览，供图片基准测试及流水线检查，不含编辑辅助元素。"""
+    from document_store import get_document
+    get_document(DATA_DIR, ident)
+    return index()
+
+
+@app.get("/fabric-legacy")
+def fabric_editor():
+    """保留原有 Fabric 设计、自由图层和画幅变体工作流。"""
     bundle = BASE_DIR / "static" / "fabric-poc.bundle.js"
     if not bundle.is_file() or bundle.stat().st_size == 0:
         return render_template("editor-build-required.html"), 503
@@ -670,13 +687,21 @@ def large_upload(_: RequestEntityTooLarge):
     return jsonify({"error": "上传内容过大，单次请求上限为40 MB。"}), 413
 
 
+from react_editor import register_editor
+
+register_editor(app, lambda: BASE_DIR, lambda: DATA_DIR, imported_legacy_design, _legacy_asset_info)
+
+
 if __name__ == "__main__":
     from editor_build import ensure_editor_bundle
+    from react_editor import ensure_react_bundle
 
     ok, message = ensure_editor_bundle(BASE_DIR)
     print(message, flush=True)
     if not ok:
         print("经典封面编辑器仍可在 /legacy 打开。", flush=True)
+    react_ok, react_message = ensure_react_bundle(BASE_DIR)
+    print(react_message, flush=True)
     no_browser = "--no-browser" in sys.argv
     port = int(os.environ.get("COVER_STUDIO_PORT", "8765"))
     url = f"http://127.0.0.1:{port}"

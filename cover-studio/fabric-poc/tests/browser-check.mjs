@@ -25,9 +25,9 @@ page.on("console", (message) => {
   if (message.type() === "error") diagnostics.push(message.text().slice(0,250));
 });
 try {
-  await page.goto(baseUrl + "/",{waitUntil:"domcontentloaded",timeout:40000});
+  await page.goto(baseUrl + "/fabric-legacy",{waitUntil:"domcontentloaded",timeout:40000});
   await page.waitForFunction(()=>Boolean(window.__fabricPoc?.getState().ready),null,{timeout:40000});
-  if(new URL(page.url()).pathname!=="/")throw Error("正式编辑器的首页地址不正确");
+  if(new URL(page.url()).pathname!=="/fabric-legacy")throw Error("原 Fabric 编辑器兼容入口不正确");
   const classicPage=await page.request.get(baseUrl+"/legacy");
   if(classicPage.status()!==200 || !(await classicPage.text()).includes('id="coverForm"'))
     throw Error("经典封面入口或原有编辑表单不可用");
