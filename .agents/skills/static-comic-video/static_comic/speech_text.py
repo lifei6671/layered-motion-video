@@ -3,7 +3,7 @@ from difflib import SequenceMatcher
 import re
 import unicodedata
 
-from .contracts import validate
+from .contracts import digest, validate
 from .timeline import seconds_to_samples
 
 
@@ -58,11 +58,21 @@ def check_overrides(overrides, board, script, hashes, samples):
     ranges = {"reading": [], "window": []}
     pairs = list(zip([s["id"] for s in board["shots"]], [s["id"] for s in board["shots"]][1:]))
     boundaries = set()
+    corrections = set()
     for entry in overrides["entries"]:
         check_human(entry["human"])
         if not entry["reason"].strip():
             raise ValueError("Override reason cannot be blank")
         kind = entry["kind"]
+        if kind == "asr_correction":
+            lo, hi = entry["script_range"]
+            key = (lo, hi, entry["expected"], entry["recognized"])
+            if (not 0 <= lo <= hi <= len(script) or key in corrections
+                    or entry["expected"] == entry["recognized"]
+                    or any(lo < s["script_range"][0] < hi for s in board["shots"])):
+                raise ValueError("Conflicting or invalid ASR correction")
+            corrections.add(key)
+            continue
         if kind == "boundary":
             pair = (entry["from_shot_id"], entry["to_shot_id"])
             if pair not in pairs or pair in boundaries or not 0 < entry["sample"] < samples:
@@ -186,6 +196,21 @@ def make_plan(script, board, coarse, entries, samples):
         if cursor >= hi:
             resolved.append({"anomaly":anomaly,"confirmations":used})
             anomalies.remove(anomaly)
-    return {"reading":reading, "asr_normalized":asr, "ordered_opcodes":opcodes,
+    corrected = []
+    for entry in (e for e in entries if e["kind"] == "asr_correction"):
+        if entry["coarse_sha256"] != digest(coarse):
+            raise ValueError("ASR correction targets stale coarse evidence")
+        matches = [a for a in anomalies if a["kind"] in
+                   ("content_mismatch", "extra_speech", "missing_or_truncated")
+                   and a["script_range"] == entry["script_range"]
+                   and a["detail"] == {"expected":entry["expected"], "recognized":entry["recognized"]}]
+        if len(matches) != 1:
+            raise ValueError("ASR correction must match one exact current content anomaly")
+        corrected.append({"anomaly":matches[0], "confirmation":entry})
+        anomalies.remove(matches[0])
+    result = {"reading":reading, "asr_normalized":asr, "ordered_opcodes":opcodes,
             "matching_ratio":matcher.ratio(), "windows":windows, "anomalies":anomalies,
             "resolved_timing_anomalies":resolved}
+    if corrected:
+        result["resolved_asr_anomalies"] = corrected
+    return result

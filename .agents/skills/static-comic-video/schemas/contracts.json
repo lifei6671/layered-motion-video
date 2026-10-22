@@ -962,6 +962,50 @@
                   "human"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "const": "asr_correction"
+                  },
+                  "script_range": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                  },
+                  "coarse_sha256": {
+                    "$ref": "#/$defs/hash"
+                  },
+                  "expected": {
+                    "type": "string"
+                  },
+                  "recognized": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "human": {
+                    "$ref": "#/$defs/human"
+                  }
+                },
+                "required": [
+                  "kind",
+                  "script_range",
+                  "coarse_sha256",
+                  "expected",
+                  "recognized",
+                  "reason",
+                  "human"
+                ],
+                "additionalProperties": false
               }
             ]
           },

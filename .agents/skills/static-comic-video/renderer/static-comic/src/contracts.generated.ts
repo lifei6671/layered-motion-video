@@ -248,6 +248,19 @@ export interface Overrides {
         reason: string;
         human: Human;
       }
+    | {
+        kind: 'asr_correction';
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        script_range: [number, number];
+        coarse_sha256: Hash;
+        expected: string;
+        recognized: string;
+        reason: string;
+        human: Human;
+      }
   )[];
 }
 export interface Timeline {

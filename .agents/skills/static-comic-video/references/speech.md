@@ -35,11 +35,13 @@ WhisperX 3.8.6 自身把字符秒数舍入到 0.001 秒。适配器用其原始�
 
 ## 人工纠错
 
-首次无覆盖运行会生成 `work/alignment/overrides.template.json`。Agent 读取诊断、定位并展示有问题的原文和音频片段，只对确实不确定的读法或边界请求用户意见，可合并一批问题；不要要求用户算采样点、复制模板或编辑 JSON。收到明确意见后由 Agent 填写 `input/overrides.json` 并重跑；已有覆盖不会被 align 改写。Schema 沿用 P1 的三种 entry：
+首次无覆盖运行会生成 `work/alignment/overrides.template.json`。Agent 读取诊断、定位并展示有问题的原文和音频片段，只对确实不确定的读法或边界请求用户意见，可合并一批问题；不要要求用户算采样点、复制模板或编辑 JSON。收到明确意见后由 Agent 填写 `input/overrides.json` 并重跑；已有覆盖不会被 align 改写。Schema 支持以下 entry：
 
 - `reading`：`script_range` 和实际 `reading`，用于金额、单位、缩写或识别表述差异。数字超过四位默认候选按数字逐位读；不同读法要明确覆盖。英文缩写不强行用中文模型 wildcard 冒充对齐，需确认实际读法。
 - `window`：原文区间和全局 48 kHz `samples: [start,end]`，重对齐范围不跨镜头，不拆一个读法 token。
 - `boundary`：相邻两侧 `from_shot_id`、`to_shot_id` 和全局 `sample`，保留人工确认来源。第一镜头固定从音频原点 0 开始。
+
+- `asr_correction`：用户核对音频后确认的识别错误。绑定完整粗识别证据的 `coarse_sha256`，以及原文 `script_range`、归一化 `expected` / `recognized`；加字位置允许空原文区间。只消解一个完全匹配的当前内容异常，保留原始 ASR、异常与确认记录于 `plan.resolved_asr_anomalies`。不改原文或音频，不生成字符时间、不补齐窗口；仍需独立可靠窗口与声学证据。错误摘要、重复确认或无法匹配的旧确认会失败。真实漏读/加读/截断不能登记为识别错误。
 
 每条必须有原因及真实 `human` 收据（操作者、带时区时间、用户交互证据），并绑定原文/源音频/分镜字节摘要。覆盖重复、交叉、越界、窗口逆序、过期摘要会失败。修改覆盖后重新执行 `align`；随后 `compile` 从不可变原始证据确定性重放，不接受手改 `aligned.json` 的 PASS 或时间。原文、声音、分镜、覆盖或 PCM 改动都会使旧结果失效。
 
