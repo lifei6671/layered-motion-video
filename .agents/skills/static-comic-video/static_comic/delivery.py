@@ -82,14 +82,31 @@ def snapshot(root, technical=False, *, write=False):
             raise ValueError('Staged execution differs from current inputs; compile again')
     if read_json(read_bytes(root, f"{loc['timeline']}/timeline.lock.json", SMALL_FILE)) != compiled['timeline']:
         raise ValueError('Locked timeline differs from current inputs; compile again')
+    if compiled['motion_cards']['present']:
+        # 已选定字卡计划是当前视觉批准对象的一部分，独立锁不可被旧事件冒充。
+        from .motion_cards import selected_plan
+        original = selected_plan(root, read_bytes(root, 'input/script.txt', SMALL_FILE))
+        locked = read_json(read_bytes(root, f"{loc['timeline']}/motion_cards.lock.json", SMALL_FILE))
+        if (original is None or locked.get('events') != compiled['motion_cards']['events']
+                or locked.get('plan_sha256') != digest(original)
+                or locked.get('script_sha256') != original['script_sha256']):
+            raise ValueError('Motion-card lock is stale or changed; compile and preview again')
     for image in compiled['staging']['images']:
         if file_hash(resolve_path(root, loc['remotion']+'/public/'+image['staged_image'])) != image['staged_sha256']:
             raise ValueError('Staged image differs from the locked image snapshot')
+    for resource in compiled['staging'].get('resources', []):
+        if file_hash(resolve_path(root, loc['remotion']+'/public/'+resource['path'])) != resource['sha256']:
+            raise ValueError('Staged emphasis resource differs from the locked snapshot')
     value = {'artifact_kind': compiled['artifact_kind'], 'timeline': digest(compiled['timeline']),
              'props': digest(compiled['props']), 'staging': digest(compiled['staging']),
              'inputs': compiled['timeline']['input_hashes'], 'runtime': runtime(),
              'master_sha256': file_hash(resolve_path(root, 'work/audio/master_48k.wav')),
              'total_frames': compiled['total_frames']}
+    if compiled['emphasis']['sfx']:
+        from .sfx_mix import mix
+        audio = mix(root, compiled['emphasis']['sfx'], compiled['emphasis_policy']['audio'], write=write)
+        value['audio_reference'] = {'path':audio['mix_path'], 'sha256':audio['mix_sha256'],
+                                    'stem_sha256':audio['stem_sha256'], 'samples':audio['samples']}
     return value, compiled
 
 
@@ -167,6 +184,8 @@ def visual_product(root, snap, compiled, loc, profile_name, technical):
                  'installed': rt['installed'], 'node': rt['tools']['node'], 'technical': technical,
                  'images': {i['staged_image']: i['staged_sha256'] for i in compiled['staging']['images']},
                  'version': versions('static_comic/delivery.py')}
+    if compiled['staging'].get('resources'):
+        build_key['resources'] = {r['path']:r['sha256'] for r in compiled['staging']['resources']}
     def build_bundle(temp):
         command = ['node', str(RENDERER/'node_modules/@remotion/cli/remotion-cli.js'), 'bundle',
                    'src/technical.tsx' if technical else 'src/index.tsx', f'--out-dir={temp / "bundle"}',
@@ -229,11 +248,21 @@ def preview(root, technical=False):
     snap, compiled = snapshot(root, technical, write=True)
     loc = locations(technical); profile = PROFILES['preview']
     names = [loc['preview']+'/'+n for n in ('preview_visual.mp4', 'preview.mp4', 'contact_sheet.jpg')]
-    master = resolve_path(root, 'work/audio/master_48k.wav')
+    master = resolve_path(root, snap.get('audio_reference',{}).get('path','work/audio/master_48k.wav'))
     started = time.monotonic()
     visual, vr = visual_product(root, snap, compiled, loc, 'preview', technical)
     audible, mr = mux_product(root, visual, master, snap, 'preview')
     sheet = contact_sheet(root, compiled, loc)
+    extra = {}
+    if compiled['emphasis']['visual'] or compiled['emphasis']['sfx']:
+        from .emphasis_preview import preview_evidence
+        extra = preview_evidence(visual, compiled, loc)
+        if compiled['emphasis']['sfx']:
+            extra[loc['preview']+'/mix.json'] = read_bytes(root,'reports/mix.json',16*1024*1024)
+    if compiled['motion_cards']['events']:
+        # 动态镜头抽帧取自本次真正渲出的视觉视频，摘要进入试听批准绑定。
+        from .motion_card_preview import motion_card_evidence
+        extra.update(motion_card_evidence(visual, compiled, loc))
     if snapshot(root, technical)[0] != snap:
         raise ValueError('Inputs changed while rendering; preview cannot be approved')
     from .contracts import bytes_digest
@@ -241,7 +270,8 @@ def preview(root, technical=False):
                                         names[2]: bytes_digest(sheet)},
               'validation': mr['validation'], 'commands': [vr['command'], mr['command']],
               'elapsed_seconds': time.monotonic()-started}
-    publish(root, {names[0]: visual, names[1]: audible, names[2]: sheet,
+    record['files'].update({name:bytes_digest(data) for name,data in extra.items()})
+    publish(root, {names[0]: visual, names[1]: audible, names[2]: sheet, **extra,
                    loc['reports']+'/preview.json': canonical(record)})
     return {'status': 'PREVIEW_AUDIO_MUXED', 'artifact_kind': snap['artifact_kind'], 'preview': names[1],
             'contact_sheet': names[2], 'binding_sha256': review_binding(record), 'human_acceptance': 'NOT_RUN'}
@@ -276,7 +306,7 @@ def approve(root, decision, technical=False):
             verify(root, technical)
         else:
             verify_media(resolve_path(root, loc['preview']+'/preview_visual.mp4'),
-                         resolve_path(root, 'work/audio/master_48k.wav'), frames=snap['total_frames'],
+                         resolve_path(root, snap.get('audio_reference',{}).get('path','work/audio/master_48k.wav')), frames=snap['total_frames'],
                          width=960, height=540, audible=resolve_path(root, loc['preview']+'/preview.mp4'))
     outputs = {loc['review']+'/'+name: decision,
                loc['review']+f'/delivery-events/{digest(decision)}.json': decision}
@@ -314,7 +344,7 @@ def mux(root, technical=False):
     if visual['approval_sha256'] != digest(approval):
         raise ValueError('Formal visual was rendered under a different approval')
     visual_path = resolve_path(root, loc['remotion']+'/visual.mp4')
-    master = resolve_path(root, 'work/audio/master_48k.wav')
+    master = resolve_path(root, snap.get('audio_reference',{}).get('path','work/audio/master_48k.wav'))
     name = loc['output']+'/final.mp4'
     started = time.monotonic()
     target, product = mux_product(root, visual_path, master, snap, 'final')
@@ -337,7 +367,7 @@ def verify(root, technical=False):
     if final['approval_sha256'] != digest(approval):
         raise ValueError('Final media approval is stale')
     result = verify_media(resolve_path(root, loc['remotion']+'/visual.mp4'),
-        resolve_path(root, 'work/audio/master_48k.wav'), frames=snap['total_frames'], width=1920, height=1080,
+        resolve_path(root, snap.get('audio_reference',{}).get('path','work/audio/master_48k.wav')), frames=snap['total_frames'], width=1920, height=1080,
         audible=resolve_path(root, loc['output']+'/final.mp4'))
     report, response = verification_record(root, snap, final, result, technical)
     publish(root, {loc['reports']+'/validation.json': canonical(report)})
@@ -380,10 +410,19 @@ def inspect(root, technical=False):
     except (ValueError, OSError):
         pass  # Only the optional human receipt is absent/rejected/stale; media was checked above.
     binding = review_binding(candidate)
+    emphasis_html = ''
+    if loc['preview']+'/emphasis.json' in candidate['files']:
+        evidence = read_record(root,loc['preview']+'/emphasis.json')
+        rows = ''.join('<tr>'+''.join('<td>'+escape(str(e[k]))+'</td>' for k in
+                       ('id','kind','start_sample','play_samples','gain_db'))+'</tr>' for e in evidence['sfx_events'])
+        emphasis_html = ('<h2>文字关键帧与音效</h2><p>静音决定仅关闭新增音效，完整旁白保留。</p>'
+            + ('<img width="960" src="emphasis_sheet.jpg">' if loc['preview']+'/emphasis_sheet.jpg' in candidate['files'] else '')
+            + '<table border="1"><tr><th>事件</th><th>类别</th><th>起点采样</th><th>长度采样</th><th>增益 dB</th></tr>'
+            + rows+'</table><p><a href="emphasis.json">事件与跳过原因</a></p>')
     html = (f'<!doctype html><meta charset="utf-8"><title>有声预览审核</title><h1>{escape(snap["artifact_kind"])}</h1>'
             '<p>请完整试听并核对语义；技术检查通过不代表批准。正式画质需另审。</p>'
             '<video controls width="960" src="preview.mp4"></video><p><img width="960" src="contact_sheet.jpg"></p>'
-            f'<p>状态：{status}</p><pre>binding_sha256: {binding}</pre>')
+            f'<p>状态：{status}</p><pre>binding_sha256: {binding}</pre>'+emphasis_html)
     write_docs(root, {loc['preview']+'/index.html': html.encode('utf-8')})
     return {'status': status, 'binding_sha256': binding, 'report': loc['preview']+'/index.html',
             'technical': candidate['validation']['status'], 'formal_quality': 'NOT_RUN'}

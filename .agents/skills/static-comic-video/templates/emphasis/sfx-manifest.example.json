@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "asset_id": "replace-sfx-id",
+      "path": "assets/sfx/replace-sfx.wav",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_kind": "user_provided",
+      "source_uri": "REPLACE_WITH_ACTUAL_SOURCE",
+      "author": "REPLACE_WITH_ACTUAL_AUTHOR",
+      "license": "REPLACE_WITH_ACTUAL_LICENSE",
+      "usage_scope": "REPLACE_WITH_ACTUAL_SCOPE",
+      "license_evidence": {
+        "path": "assets/sfx/replace-LICENSE.txt",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "review_status": "CANDIDATE",
+      "sample_rate": 48000,
+      "channels": 2,
+      "duration_samples": 4800,
+      "tags": [
+        "scene"
+      ]
+    }
+  ]
+}

@@ -236,13 +236,44 @@ def compile_project(root, *, technical_fixture=False, write=True):
                         "staged_image": staged, "staged_sha256": image_hash})
         outputs[f"{timeline_dir}/cover/{sid}.png"] = preview
         geometry.append(detail)
-    props = validate("props", {"schema_version": "2.0", "artifact_kind": artifact, "video": video, "shots": execution})
+    from .emphasis import load_extension
+    from .emphasis_timing import compile_events
+    from .motion_cards import compile_cards
+    # 先锁定动态字卡、再编译可关联其动作节点的音效，保持单一整数帧时钟。
+    # 文字覆盖冲突在两侧编译完成后统一拒绝，防止改变现有审核后的布局。
+    script_bytes = read_bytes(root, "input/script.txt", SMALL_FILE)
+    extension = load_extension(root, script_bytes=script_bytes,
+                               shot_ids=ids, technical=technical_fixture)
+    motion_cards = compile_cards(root, board, execution, [],
+                                 script_bytes=script_bytes)
+    emphasis = compile_events(root, extension, board, execution, geometry, prepared,
+                              motion_cards=motion_cards['events'],
+                              technical=technical_fixture, write=write)
+    if any(card['start_frame'] < event['end_frame'] and event['start_frame'] < card['end_frame']
+           for card in motion_cards['events'] for event in emphasis['visual']):
+        raise ValueError('MOTION_EMPHASIS_COLLISION: selected card overlaps locked keyword animation')
+    props_data = {"schema_version": "2.0", "artifact_kind": artifact, "video": video, "shots": execution}
+    if emphasis['visual']:
+        props_data['visual_emphasis'] = emphasis['visual']
+    if motion_cards['events']:
+        props_data['motion_cards'] = motion_cards['events']
+    if extension['policy']['mode'] != 'disabled':
+        hashes.update({'emphasis/'+k: v for k,v in extension['input_hashes'].items()})
+        hashes['emphasis/observations'] = digest(emphasis['observations'])
+    if motion_cards['present']:
+        hashes.update(motion_cards['input_hashes'])
+    outputs.update(emphasis['outputs'])
+    outputs.update(motion_cards['outputs'])
+    props = validate("props", props_data)
     timeline = validate("timeline", {"schema_version": "2.0", "compiler_version": COMPILER_VERSION,
                         "artifact_kind": artifact, "episode_id": board["episode_id"], "input_hashes": hashes,
                         "audio": board["audio"], "video": video,
                         "shots": [{"source": source, "execution": target} for source, target in zip(board["shots"], execution)]})
-    manifest = validate("staging", {"schema_version": "1.0", "artifact_kind": artifact,
-                                   "policy_sha256": policy_hash, "images": staging})
+    manifest_data = {"schema_version": "1.0", "artifact_kind": artifact,
+                     "policy_sha256": policy_hash, "images": staging}
+    if emphasis['resources']:
+        manifest_data['resources'] = emphasis['resources']
+    manifest = validate("staging", manifest_data)
     outputs.update({f"{timeline_dir}/timeline.lock.json": canonical(timeline) + b"\n",
                     f"{timeline_dir}/source-index.json": canonical(source_index) + b"\n",
                     f"{timeline_dir}/geometry.json": canonical({"artifact_kind": artifact, "shots": geometry}) + b"\n",
@@ -254,19 +285,24 @@ def compile_project(root, *, technical_fixture=False, write=True):
         resolve_path(root, name, output=True)
     public = root / remotion / "public"
     existing = []
+    declared = {r['path']:r['sha256'] for r in emphasis['resources']}
+    old_manifest = resolve_path(root, f"{remotion}/staging-manifest.json")
+    if old_manifest.exists():
+        previous = validate('staging', read_json(read_bytes(root, f"{remotion}/staging-manifest.json", SMALL_FILE)))
+        declared.update({r['path']:r['sha256'] for r in previous.get('resources',[])})
     if public.exists():
         for path in public.rglob("*"):
             relative = path.relative_to(root).as_posix()
             resolve_path(root, relative + "/.probe" if path.is_dir() else relative, output=True)
             if path.is_dir():
-                if path != public / "images":
+                if path not in [public / p for p in ('images','fonts','effects')]:
                     raise ValueError("Unexpected directory in public; refuse to expose or delete it")
                 continue
             name = path.relative_to(public).as_posix()
-            if not re.fullmatch(r"images/[a-f0-9]{64}\.png", name):
+            if not re.fullmatch(r"images/[a-f0-9]{64}\.png", name) and name not in declared:
                 raise ValueError("Public directory contains non-staged data; remove it explicitly")
             data = read_bytes(root, relative, IMAGE_FILE)
-            if bytes_digest(data) != path.stem:
+            if bytes_digest(data) != path.stem or (name in declared and declared[name] != path.stem):
                 raise ValueError(f"Corrupt staged snapshot: {name}")
             existing.append(path)
     if write:
@@ -286,4 +322,6 @@ def compile_project(root, *, technical_fixture=False, write=True):
                 old.unlink()  # Only validated, content-addressed generated snapshots.
     return {"status": "PASS", "artifact_kind": artifact, "total_frames": total,
             "timeline": timeline, "props": props, "staging": manifest,
-            "geometry": geometry, "written": list(outputs) if write else []}
+            "geometry": geometry, "emphasis": {k:v for k,v in emphasis.items() if k != 'outputs'},
+            "motion_cards": {k:v for k,v in motion_cards.items() if k != 'outputs'},
+            "emphasis_policy": extension['policy'], "written": list(outputs) if write else []}

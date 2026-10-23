@@ -14,6 +14,7 @@ export type ImageStatus =
   | 'REJECTED'
   | 'UNAVAILABLE';
 export type ArtifactKind = 'production' | 'technical_fixture';
+export type ShotId = string;
 
 export interface StaticComicContracts {
   storyboard: Storyboard;
@@ -25,6 +26,20 @@ export interface StaticComicContracts {
   timeline: Timeline;
   props: Props;
   staging: Staging;
+  emphasisPolicy?: EmphasisPolicy;
+  emphasisPlan?: EmphasisPlan;
+  shotEmphasisDecision?: ShotEmphasisDecision;
+  visualEmphasisEvent?: VisualEmphasisEvent;
+  sfxEvent?: SfxEvent;
+  fontManifest?: FontManifest;
+  sfxManifest?: SfxManifest;
+  compiledVisualEmphasis?: CompiledVisualEmphasis;
+  compiledSfxEvent?: CompiledSfxEvent;
+  emphasisResourceDecision?: EmphasisResourceDecision;
+  emphasisResourceApprovals?: EmphasisResourceApprovals;
+  motionPlan?: MotionPlan;
+  motionCardEvent?: MotionCardEvent;
+  compiledMotionCard?: CompiledMotionCard;
 }
 export interface Storyboard {
   schema_version: '2.0';
@@ -142,7 +157,7 @@ export interface Human {
   evidence: string;
   confirmation?: {
     source: 'local_terminal' | 'conversation';
-    scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final';
+    scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final' | 'resources';
     payload: {
       [k: string]: unknown;
     };
@@ -154,7 +169,7 @@ export interface ConversationEvidence {
   thread_id: string;
   message_id?: string;
   user_message: string;
-  scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final';
+  scope: 'policy' | 'plan' | 'images' | 'transitions' | 'preview' | 'final' | 'resources';
   decision_sha256: Hash;
 }
 export interface Manifest {
@@ -327,6 +342,84 @@ export interface Props {
    * @minItems 1
    */
   shots: [ExecutionShot, ...ExecutionShot[]];
+  /**
+   * @maxItems 10000
+   */
+  visual_emphasis?: CompiledVisualEmphasis[];
+  /**
+   * @maxItems 100
+   */
+  motion_cards?: CompiledMotionCard[];
+}
+export interface CompiledVisualEmphasis {
+  id: string;
+  shot_id: ShotId;
+  text: string;
+  preset:
+    | 'soft_rise'
+    | 'comic_pop'
+    | 'comic_burst'
+    | 'number_tick'
+    | 'underline_reveal'
+    | 'stagger_group'
+    | 'ink_reveal'
+    | 'light_sweep'
+    | 'fragment_disperse'
+    | 'particle_assemble';
+  tier: number;
+  start_frame: number;
+  end_frame: number;
+  anchor_frame: number;
+  enter_frames: number;
+  hold_frames: number;
+  exit_frames: number;
+  markers: {
+    enter_start: number;
+    impact: number;
+    settle: number;
+    exit_start: number;
+  };
+  layout: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    font_size: number;
+  };
+  font_asset_id: string;
+  font_path: string;
+  font_sha256: Hash;
+  color: string;
+  stroke_color: string;
+  stroke_width: number;
+  shadow_px: number;
+  seed: number;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  script_range: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  speech_samples: [number, number];
+}
+export interface CompiledMotionCard {
+  id: string;
+  shot_id: ShotId;
+  recipe: 'talkcraft-number-slab' | 'talkcraft-ink-underline' | 'talkcraft-chapter-card';
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  script_range: [number, number];
+  text: string;
+  label?: string;
+  style: 'paper' | 'ink' | 'bright';
+  source: 'manual' | 'agent' | 'rules';
+  start_frame: number;
+  end_frame: number;
 }
 export interface Staging {
   schema_version: '1.0';
@@ -351,4 +444,406 @@ export interface Staging {
       staged_sha256: string;
     }[]
   ];
+  /**
+   * @maxItems 10000
+   */
+  resources?: {
+    path: string;
+    sha256: Hash;
+    asset_id: string;
+    kind: 'font' | 'effect';
+  }[];
+}
+export interface EmphasisPolicy {
+  schema_version: '1.0';
+  mode: 'disabled' | 'auto' | 'manual' | 'mixed';
+  visual: {
+    enabled: boolean;
+    selection?: 'adaptive' | 'manual';
+    theme?: 'comic' | 'comic_bright' | 'comic_ink' | 'minimal' | 'cinematic';
+    max_events_per_minute?: number;
+    max_events_per_shot?: number;
+    min_gap_frames?: number;
+    max_concurrent?: 1;
+    allow_advanced?: boolean;
+    allow_prerender?: false;
+    /**
+     * @minItems 4
+     * @maxItems 4
+     */
+    safe_insets?: [number, number, number, number];
+  };
+  audio: {
+    enabled: boolean;
+    /**
+     * @maxItems 4
+     */
+    uses?:
+      | []
+      | ['keyword' | 'scene' | 'transition' | 'narrative']
+      | ['keyword' | 'scene' | 'transition' | 'narrative', 'keyword' | 'scene' | 'transition' | 'narrative']
+      | [
+          'keyword' | 'scene' | 'transition' | 'narrative',
+          'keyword' | 'scene' | 'transition' | 'narrative',
+          'keyword' | 'scene' | 'transition' | 'narrative'
+        ]
+      | [
+          'keyword' | 'scene' | 'transition' | 'narrative',
+          'keyword' | 'scene' | 'transition' | 'narrative',
+          'keyword' | 'scene' | 'transition' | 'narrative',
+          'keyword' | 'scene' | 'transition' | 'narrative'
+        ];
+    max_events_per_minute?: number;
+    max_concurrent?: number;
+    default_sfx_gain_db?: number;
+    peak_ceiling_dbfs?: number;
+    sample_rate?: 48000;
+    channels?: 2;
+    sfx_peak_ceiling_dbfs?: number;
+  };
+}
+export interface EmphasisPlan {
+  schema_version: '1.0';
+  script_sha256: Hash;
+  /**
+   * @maxItems 10000
+   */
+  shot_decisions: ShotEmphasisDecision[];
+  /**
+   * @maxItems 10000
+   */
+  visual_events: VisualEmphasisEvent[];
+  /**
+   * @maxItems 10000
+   */
+  audio_events: SfxEvent[];
+  /**
+   * @maxItems 10000
+   */
+  excluded: {
+    id: string;
+    reason_code:
+      | 'VISUAL_BUSY'
+      | 'EMBEDDED_TEXT'
+      | 'NO_SAFE_REGION'
+      | 'LOW_SEMANTIC_VALUE'
+      | 'QUIET_NARRATIVE'
+      | 'SCENE_MOTION_CONFLICT'
+      | 'TIMING_UNCERTAIN'
+      | 'DENSITY_BUDGET'
+      | 'MANUAL_SKIP'
+      | 'KEY_NUMBER'
+      | 'KEY_CONCEPT'
+      | 'NARRATIVE_EMPHASIS'
+      | 'SCENE_CONTEXT'
+      | 'TRANSITION_CONTEXT'
+      | 'MANUAL_OVERRIDE'
+      | 'DISABLED';
+    reason: string;
+  }[];
+}
+export interface ShotEmphasisDecision {
+  shot_id: ShotId;
+  text_decision: 'auto' | 'show' | 'skip';
+  sfx_decision: 'auto' | 'allow' | 'silence';
+  reason_code:
+    | 'VISUAL_BUSY'
+    | 'EMBEDDED_TEXT'
+    | 'NO_SAFE_REGION'
+    | 'LOW_SEMANTIC_VALUE'
+    | 'QUIET_NARRATIVE'
+    | 'SCENE_MOTION_CONFLICT'
+    | 'TIMING_UNCERTAIN'
+    | 'DENSITY_BUDGET'
+    | 'MANUAL_SKIP'
+    | 'KEY_NUMBER'
+    | 'KEY_CONCEPT'
+    | 'NARRATIVE_EMPHASIS'
+    | 'SCENE_CONTEXT'
+    | 'TRANSITION_CONTEXT'
+    | 'MANUAL_OVERRIDE'
+    | 'DISABLED';
+  reason: string;
+  text_reason_code?:
+    | 'VISUAL_BUSY'
+    | 'EMBEDDED_TEXT'
+    | 'NO_SAFE_REGION'
+    | 'LOW_SEMANTIC_VALUE'
+    | 'QUIET_NARRATIVE'
+    | 'SCENE_MOTION_CONFLICT'
+    | 'TIMING_UNCERTAIN'
+    | 'DENSITY_BUDGET'
+    | 'MANUAL_SKIP'
+    | 'KEY_NUMBER'
+    | 'KEY_CONCEPT'
+    | 'NARRATIVE_EMPHASIS'
+    | 'SCENE_CONTEXT'
+    | 'TRANSITION_CONTEXT'
+    | 'MANUAL_OVERRIDE'
+    | 'DISABLED';
+  text_reason?: string;
+  sfx_reason_code?:
+    | 'VISUAL_BUSY'
+    | 'EMBEDDED_TEXT'
+    | 'NO_SAFE_REGION'
+    | 'LOW_SEMANTIC_VALUE'
+    | 'QUIET_NARRATIVE'
+    | 'SCENE_MOTION_CONFLICT'
+    | 'TIMING_UNCERTAIN'
+    | 'DENSITY_BUDGET'
+    | 'MANUAL_SKIP'
+    | 'KEY_NUMBER'
+    | 'KEY_CONCEPT'
+    | 'NARRATIVE_EMPHASIS'
+    | 'SCENE_CONTEXT'
+    | 'TRANSITION_CONTEXT'
+    | 'MANUAL_OVERRIDE'
+    | 'DISABLED';
+  sfx_reason?: string;
+}
+export interface VisualEmphasisEvent {
+  id: string;
+  shot_id: ShotId;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  script_range: [number, number];
+  text: string;
+  semantic_type: 'impact' | 'number' | 'concept' | 'narrative' | 'contrast' | 'sequence';
+  importance: 'low' | 'medium' | 'high';
+  preset:
+    | 'soft_rise'
+    | 'comic_pop'
+    | 'comic_burst'
+    | 'number_tick'
+    | 'underline_reveal'
+    | 'stagger_group'
+    | 'ink_reveal'
+    | 'light_sweep'
+    | 'fragment_disperse'
+    | 'particle_assemble';
+  tier: number;
+  layout: {
+    preset: 'upper_left' | 'upper_right' | 'left_center' | 'right_center' | 'lower_side';
+    x?: number;
+    y?: number;
+    max_width?: number;
+  };
+  pinned: boolean;
+  source: 'agent' | 'rules' | 'human';
+  font_asset_id?: string;
+  font_size?: number;
+  color?: string;
+  stroke_color?: string;
+  stroke_width?: number;
+  shadow_px?: number;
+  enter_frames?: number;
+  hold_frames?: number;
+  exit_frames?: number;
+}
+export interface SfxEvent {
+  id: string;
+  kind: 'keyword' | 'scene' | 'transition' | 'narrative';
+  sfx_asset_id: string;
+  anchor:
+    | {
+        type: 'visual_marker';
+        visual_event_id: string;
+        marker: 'enter_start' | 'impact' | 'settle' | 'exit_start';
+        offset_samples: number;
+      }
+    | {
+        type: 'shot_start';
+        shot_id: ShotId;
+        offset_samples: number;
+      }
+    | {
+        type: 'speech_start';
+        shot_id: ShotId;
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        script_range: [number, number];
+        offset_samples: number;
+      }
+    | {
+        type: 'transition_frame';
+        from_shot_id: ShotId;
+        point: 'start' | 'mid' | 'end';
+        offset_samples: number;
+      }
+    | {
+        type: 'motion_marker';
+        motion_card_id: string;
+        marker: 'enter' | 'impact' | 'exit';
+        offset_samples: number;
+      };
+  gain_db: number;
+  fade_in_samples: number;
+  fade_out_samples: number;
+  pinned: boolean;
+  source: 'agent' | 'rules' | 'human';
+  trim_start_sample?: number;
+  trim_end_sample?: number;
+  allow_tail_trim?: boolean;
+  sync_to?: 'onset' | 'peak' | 'end';
+}
+export interface FontManifest {
+  schema_version: '1.0';
+  /**
+   * @maxItems 1000
+   */
+  assets: {
+    asset_id: string;
+    path: string;
+    sha256: Hash;
+    source_kind: 'local_created' | 'user_provided' | 'licensed_third_party' | 'confirmed_generated';
+    source_uri: string;
+    author: string;
+    license: string;
+    usage_scope: string;
+    license_evidence: {
+      path: string;
+      sha256: Hash;
+    };
+    review_status: 'APPROVED' | 'TECHNICAL_ONLY' | 'CANDIDATE' | 'REJECTED';
+    family: string;
+  }[];
+}
+export interface SfxManifest {
+  schema_version: '1.0';
+  /**
+   * @maxItems 10000
+   */
+  assets: {
+    asset_id: string;
+    path: string;
+    sha256: Hash;
+    source_kind: 'local_created' | 'user_provided' | 'licensed_third_party' | 'confirmed_generated';
+    source_uri: string;
+    author: string;
+    license: string;
+    usage_scope: string;
+    license_evidence: {
+      path: string;
+      sha256: Hash;
+    };
+    review_status: 'APPROVED' | 'TECHNICAL_ONLY' | 'CANDIDATE' | 'REJECTED';
+    sample_rate: number;
+    channels: number;
+    duration_samples: number;
+    /**
+     * @minItems 1
+     */
+    tags: ['keyword' | 'scene' | 'transition' | 'narrative', ...('keyword' | 'scene' | 'transition' | 'narrative')[]];
+    normalized_path?: string;
+    normalized_sha256?: Hash;
+    generator?: {
+      provider: 'earshot';
+      bank_id: string;
+      bank_version: string;
+      source_commit: string;
+      options_sha256: Hash;
+    };
+    cue_points?: {
+      onset_samples: number;
+      peak_samples: number;
+      end_samples: number;
+    };
+  }[];
+}
+export interface CompiledSfxEvent {
+  id: string;
+  kind: 'keyword' | 'scene' | 'transition' | 'narrative';
+  start_sample: number;
+  gain_db: number;
+  fade_in_samples: number;
+  fade_out_samples: number;
+  asset_id: string;
+  asset_sha256: Hash;
+  source_trim_samples: number;
+  play_samples: number;
+  normalized_path: string;
+  normalized_sha256: Hash;
+  pinned?: boolean;
+  source?: 'agent' | 'rules' | 'human';
+  anchor?:
+    | {
+        type: 'visual_marker';
+        visual_event_id: string;
+        marker: 'enter_start' | 'impact' | 'settle' | 'exit_start';
+        offset_samples: number;
+      }
+    | {
+        type: 'shot_start';
+        shot_id: ShotId;
+        offset_samples: number;
+      }
+    | {
+        type: 'speech_start';
+        shot_id: ShotId;
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        script_range: [number, number];
+        offset_samples: number;
+      }
+    | {
+        type: 'transition_frame';
+        from_shot_id: ShotId;
+        point: 'start' | 'mid' | 'end';
+        offset_samples: number;
+      }
+    | {
+        type: 'motion_marker';
+        motion_card_id: string;
+        marker: 'enter' | 'impact' | 'exit';
+        offset_samples: number;
+      };
+  allow_tail_trim?: boolean;
+  sync_to?: 'onset' | 'peak' | 'end';
+  motion_frame?: number;
+}
+export interface EmphasisResourceDecision {
+  schema_version: '1.0';
+  asset_kind: 'font' | 'sfx';
+  asset_id: string;
+  asset_sha256: Hash;
+  asset_manifest_sha256: Hash;
+  decision: 'APPROVED' | 'REJECTED';
+  human: Human;
+}
+export interface EmphasisResourceApprovals {
+  schema_version: '1.0';
+  /**
+   * @maxItems 1000
+   */
+  decisions: EmphasisResourceDecision[];
+}
+export interface MotionPlan {
+  schema_version: '1.0';
+  script_sha256: Hash;
+  /**
+   * @maxItems 1000
+   */
+  events: MotionCardEvent[];
+}
+export interface MotionCardEvent {
+  id: string;
+  shot_id: ShotId;
+  recipe: 'talkcraft-number-slab' | 'talkcraft-ink-underline' | 'talkcraft-chapter-card';
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  script_range: [number, number];
+  text: string;
+  label?: string;
+  style: 'paper' | 'ink' | 'bright';
+  source: 'manual' | 'agent' | 'rules';
+  start_frame: number;
+  end_frame: number;
 }

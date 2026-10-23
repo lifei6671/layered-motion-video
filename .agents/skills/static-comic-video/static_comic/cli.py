@@ -9,6 +9,32 @@ from .project import compile_project
 
 
 def main():
+    # Earshot 只是音效供应端：只生成候选，不自动批准或修改视频计划。
+    if len(sys.argv) > 1 and sys.argv[1] == 'earshot':
+        from .earshot_provider import main as earshot_main
+        try:
+            print(json.dumps(earshot_main(sys.argv[2:]), ensure_ascii=True))
+            return 0
+        except (ValueError, OSError, subprocess.TimeoutExpired) as error:
+            print(json.dumps({'status': 'FAIL', 'error': str(error)}), file=sys.stderr)
+            return 2
+    # 动态镜头计划的受控 CLI，独立于关键词和音效。
+    if len(sys.argv) > 1 and sys.argv[1] == 'motion':
+        from .motion_cards import main as motion_main
+        try:
+            print(json.dumps(motion_main(sys.argv[2:]), ensure_ascii=True))
+            return 0
+        except (ValueError, OSError, subprocess.TimeoutExpired) as error:
+            print(json.dumps({'status': 'FAIL', 'error': str(error)}), file=sys.stderr)
+            return 2
+    if len(sys.argv) > 1 and sys.argv[1] in ('emphasis', 'sfx'):
+        from .emphasis_cli import main as emphasis_main
+        try:
+            print(json.dumps(emphasis_main(sys.argv[1:]), ensure_ascii=True))
+            return 0
+        except (ValueError, OSError, subprocess.TimeoutExpired) as error:
+            print(json.dumps({'status':'FAIL','error':str(error)}), file=sys.stderr)
+            return 2
     if len(sys.argv) > 1 and sys.argv[1] == 'human-confirm':
         from .human_review import main as human_main
         try:

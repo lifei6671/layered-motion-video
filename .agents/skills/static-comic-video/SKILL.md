@@ -37,6 +37,12 @@ Agent 负责记录和执行，不能替用户作决定、编造回复或把一�
 
 ## 目前可执行
 
+SC-A1～A2 已增加可选 [Earshot 离线音效供应与同步协议](references/earshot.md)。`earshot doctor/list/render/audition/propose-cues` 依赖固定 Git SHA 的本机代码音效库（外部源码放忽略的 reports 内），无模型生成 48kHz WAV、声学峰值和受控素材候选；不能因自动生成通过即获得用户资源批准。选定动态字卡可提出音效动作节点候选，必须在现有 `emphasis import` / 编译 / FFmpeg 混音 / 完整试听链中执行。无音效、无场景证据或未批准资源都允许跳过；Earshot AI 听音模型没有安装，不冒称已分析。
+
+SC-M1～M2 新增可选独立动态镜头轨及非商业动效配方，先读 [混合动态镜头协议](references/motion-cards.md)。`motion propose/import/inspect` 只消费受控 JSON，`MotionCardTrack` 不增加旁白或视频时长、不侵入转场、拒绝任意 React 代码；无计划则完全沿用旧视频。SC-M3 当前仅有保守的字级数字候选，真实漫画图像语义选卡模型尚未接通。上游 video-talkcraft 改编代码为 PolyForm Noncommercial，转交/公开分发须保留版权和许可证信息，不自动复制第三方音效。动态镜头应在当前有声预览统一由用户确认。
+
+SC-K1～K5 新增可选视觉强调与独立音效，先读 [强调与混音协议](references/emphasis.md)。缺省关闭；允许零文字、零音效，保持完整旁白。`emphasis propose/import/inspect/verify` 与 `sfx inspect/mix` 已接入原编译/预览/交付入口，支持六类常规及两类二维模板、逐帧布局、采样级混音与分离缓存。规则观察不冒充视觉模型；粒子和三级特效尚不可用。技术夹具不等于真实漫画、配音或用户验收，阶段实际状态见仓库实施清单。
+
 SC-P5 已提供 `init / status / studio / preview / inspect / approve / render-visual / mux / verify`。先读 [有声交付流程](references/delivery.md)。初始化读取已有图片渠道，缺失才询问；生产预览依赖前述真实图片/语音/语义门禁。Agent 打开当前有声预览供用户完整试听，收到明确意见后自行记录并正式渲染。正式画质单独批准；技术示例不能成为生产批准。每次执行会重新检查输入与审批摘要，不依据旧文件存在判断成功。
 
 SC-P6 已接入阶段缓存及失败恢复，先读 [缓存协议](references/cache.md)。同一期串行执行，检查 reports/cache 的命中原因和 reports/attempt.json 的当前尝试状态。旧成片存在不代表新尝试成功；缓存命中不替代当前来源一致性、语义与完整试听批准。Agent 处理可恢复错误并重跑，不要求用户运行恢复命令。不要并行写同一期，也不要添加分段渲染或自动代批。

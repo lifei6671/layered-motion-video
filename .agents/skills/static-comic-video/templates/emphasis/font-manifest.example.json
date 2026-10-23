@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "assets": [
+    {
+      "asset_id": "replace-font-id",
+      "path": "assets/fonts/replace-font.ttf",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "source_kind": "user_provided",
+      "source_uri": "REPLACE_WITH_ACTUAL_SOURCE",
+      "author": "REPLACE_WITH_ACTUAL_AUTHOR",
+      "license": "REPLACE_WITH_ACTUAL_LICENSE",
+      "usage_scope": "REPLACE_WITH_ACTUAL_SCOPE",
+      "license_evidence": {
+        "path": "assets/fonts/replace-LICENSE.txt",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "review_status": "CANDIDATE",
+      "family": "REPLACE_WITH_ACTUAL_FONT_FAMILY"
+    }
+  ]
+}

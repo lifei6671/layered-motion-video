@@ -15,7 +15,8 @@ from .paths import read_bytes
 
 KEY_PATH = Path.home() / '.static-comic-video' / 'confirmation.key'
 KINDS = {'policy': 'imageDecision', 'plan': 'imageDecision', 'images': 'imageReview',
-         'transitions': 'transitionDecision', 'preview': 'deliveryDecision', 'final': 'deliveryDecision'}
+         'transitions': 'transitionDecision', 'preview': 'deliveryDecision', 'final': 'deliveryDecision',
+         'resources': 'emphasisResourceDecision'}
 
 
 def payload(decision):
